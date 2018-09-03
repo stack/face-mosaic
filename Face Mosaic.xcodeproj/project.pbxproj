@@ -14,6 +14,8 @@
 		D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */; };
 		D12B5621213B5564005B65D5 /* ImageCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */; };
 		D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */; };
+		D12B5627213C5180005B65D5 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D12B5626213C5180005B65D5 /* Shaders.metal */; };
+		D12B5629213CC626005B65D5 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5628213CC626005B65D5 /* Renderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,8 @@
 		D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewItem.swift; sourceTree = "<group>"; };
 		D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImageCollectionViewItem.xib; sourceTree = "<group>"; };
 		D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionView.swift; sourceTree = "<group>"; };
+		D12B5626213C5180005B65D5 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		D12B5628213CC626005B65D5 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,8 @@
 				D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */,
 				D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */,
 				D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */,
+				D12B5626213C5180005B65D5 /* Shaders.metal */,
+				D12B5628213CC626005B65D5 /* Renderer.swift */,
 			);
 			path = "Face Mosaic";
 			sourceTree = "<group>";
@@ -143,7 +149,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D12B5627213C5180005B65D5 /* Shaders.metal in Sources */,
 				D12B560F213B4F70005B65D5 /* ViewController.swift in Sources */,
+				D12B5629213CC626005B65D5 /* Renderer.swift in Sources */,
 				D12B560D213B4F70005B65D5 /* AppDelegate.swift in Sources */,
 				D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */,
 				D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */,

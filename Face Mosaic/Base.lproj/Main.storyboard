@@ -732,7 +732,7 @@
                                                                     <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="dLZ-bx-2zr">
                                                                         <size key="itemSize" width="64" height="64"/>
                                                                     </collectionViewFlowLayout>
-                                                                    <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                    <color key="primaryBackgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     <connections>
                                                                         <outlet property="dataSource" destination="XfG-lQ-9wD" id="8Ig-6M-Ib8"/>
                                                                         <outlet property="delegate" destination="XfG-lQ-9wD" id="0en-IT-4fY"/>
@@ -802,9 +802,20 @@
                                             <constraint firstItem="egk-8P-uqZ" firstAttribute="leading" secondItem="IHu-TU-jsD" secondAttribute="leading" id="nhM-fH-OGK"/>
                                         </constraints>
                                     </customView>
-                                    <customView fixedFrame="YES" id="Hzg-Be-D0m">
+                                    <customView id="Hzg-Be-D0m">
                                         <rect key="frame" x="242" y="0.0" width="655" height="511"/>
                                         <autoresizingMask key="autoresizingMask"/>
+                                        <subviews>
+                                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="xbA-lW-K6q" customClass="MTKView">
+                                                <rect key="frame" x="0.0" y="0.0" width="646" height="511"/>
+                                            </customView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="xbA-lW-K6q" firstAttribute="leading" secondItem="Hzg-Be-D0m" secondAttribute="leading" id="I9b-H7-jKt"/>
+                                            <constraint firstItem="xbA-lW-K6q" firstAttribute="top" secondItem="Hzg-Be-D0m" secondAttribute="top" id="PKn-ZE-oib"/>
+                                            <constraint firstAttribute="bottom" secondItem="xbA-lW-K6q" secondAttribute="bottom" id="ctg-1L-r62"/>
+                                            <constraint firstAttribute="trailing" secondItem="xbA-lW-K6q" secondAttribute="trailing" id="jm2-5a-Xk7"/>
+                                        </constraints>
                                     </customView>
                                 </subviews>
                                 <holdingPriorities>
@@ -823,6 +834,7 @@
                     <connections>
                         <outlet property="addImageButton" destination="JRy-AE-BbC" id="FL8-qk-iJn"/>
                         <outlet property="imageCollectionView" destination="yp0-0B-d5K" id="aBs-0A-iYW"/>
+                        <outlet property="metalView" destination="xbA-lW-K6q" id="zxB-5U-ykn"/>
                         <outlet property="removeImageButton" destination="QIZ-ic-aMV" id="8CR-6J-tS0"/>
                     </connections>
                 </viewController>

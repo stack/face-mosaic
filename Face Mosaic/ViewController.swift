@@ -7,6 +7,8 @@
 //
 
 import Cocoa
+import Metal
+import MetalKit
 
 fileprivate let ImageCollectionViewItemIdentifier = NSUserInterfaceItemIdentifier(rawValue: "ImageCollectionViewItem")
 
@@ -21,7 +23,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     @IBOutlet weak var addImageButton: NSButton!
     @IBOutlet weak var removeImageButton: NSButton!
     
+    @IBOutlet weak var metalView: MTKView!
+    
     var imageURLs: [URL] = []
+    
+    var renderer: Renderer!
     
     
     // MARK: - Actions
@@ -46,6 +52,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                     let path = IndexPath(item: self.imageURLs.count - 1, section: ImagesMainSection)
                     let items: Set<IndexPath> = [path]
                     self.imageCollectionView.insertItems(at: items)
+                    
+                    self.renderer.addFace(url: url)
                 }
             }
         }
@@ -59,6 +67,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         for index in sortedIndexes {
             imageURLs.remove(at: index.item)
+            renderer.removeFace(at: index.item)
         }
         
         imageCollectionView.deleteItems(at: indexes)
@@ -69,6 +78,13 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Prepare the renderer
+        metalView.device = MTLCreateSystemDefaultDevice()
+        
+        renderer = Renderer(metalView: metalView)
+        renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
+        metalView.delegate = renderer
         
         // Update the initial UI elements
         setRemoveButtonState()
@@ -104,6 +120,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     func collectionView(_ collectionView: NSCollectionView, didDeselectItemsAt indexPaths: Set<IndexPath>) {
         setRemoveButtonState()
     }
+    
     
     // MARK: - Utilities
     
