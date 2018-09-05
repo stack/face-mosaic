@@ -9,7 +9,7 @@
 import Cocoa
 
 fileprivate let backgroundColor = NSColor.clear.cgColor
-fileprivate let selectedBackgroundColor = NSColor.selectedControlColor.cgColor
+fileprivate let selectedBackgroundColor = NSColor.alternateSelectedControlColor.cgColor
 
 class ImageCollectionViewItem: NSCollectionViewItem {
 

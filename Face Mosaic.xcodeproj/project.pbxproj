@@ -16,6 +16,10 @@
 		D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */; };
 		D12B5627213C5180005B65D5 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D12B5626213C5180005B65D5 /* Shaders.metal */; };
 		D12B5629213CC626005B65D5 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5628213CC626005B65D5 /* Renderer.swift */; };
+		D1833F5D213F3B83003F6888 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5B213F3B83003F6888 /* MetalKit.framework */; };
+		D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5C213F3B83003F6888 /* Metal.framework */; };
+		D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5F213F3B8A003F6888 /* GameKit.framework */; };
+		D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +35,10 @@
 		D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionView.swift; sourceTree = "<group>"; };
 		D12B5626213C5180005B65D5 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		D12B5628213CC626005B65D5 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		D1833F5B213F3B83003F6888 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float4x4+geometry.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +46,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */,
+				D1833F5D213F3B83003F6888 /* MetalKit.framework in Frameworks */,
+				D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,6 +60,7 @@
 			children = (
 				D12B560B213B4F70005B65D5 /* Face Mosaic */,
 				D12B560A213B4F70005B65D5 /* Products */,
+				D1833F5A213F3B82003F6888 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,8 +86,19 @@
 				D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */,
 				D12B5626213C5180005B65D5 /* Shaders.metal */,
 				D12B5628213CC626005B65D5 /* Renderer.swift */,
+				D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */,
 			);
 			path = "Face Mosaic";
+			sourceTree = "<group>";
+		};
+		D1833F5A213F3B82003F6888 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D1833F5F213F3B8A003F6888 /* GameKit.framework */,
+				D1833F5C213F3B83003F6888 /* Metal.framework */,
+				D1833F5B213F3B83003F6888 /* MetalKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -149,6 +172,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */,
 				D12B5627213C5180005B65D5 /* Shaders.metal in Sources */,
 				D12B560F213B4F70005B65D5 /* ViewController.swift in Sources */,
 				D12B5629213CC626005B65D5 /* Renderer.swift in Sources */,

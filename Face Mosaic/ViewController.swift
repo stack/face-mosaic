@@ -23,6 +23,15 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     @IBOutlet weak var addImageButton: NSButton!
     @IBOutlet weak var removeImageButton: NSButton!
     
+    @IBOutlet weak var maxRotationLabel: NSTextField!
+    @IBOutlet weak var maxRotationSlider: NSSlider!
+    
+    @IBOutlet weak var iterationsLabel: NSTextField!
+    @IBOutlet weak var iterationsSlider: NSSlider!
+    
+    @IBOutlet weak var scaleLabel: NSTextField!
+    @IBOutlet weak var scaleSlider: NSSlider!
+    
     @IBOutlet weak var metalView: MTKView!
     
     var imageURLs: [URL] = []
@@ -57,6 +66,30 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 }
             }
         }
+    }
+    
+    @IBAction func interationsChanged(_ sender: Any?) {
+        let iterations = iterationsSlider.integerValue
+        renderer.iterations = iterations
+        
+        let template = NSLocalizedString("Iterations: %i", comment: "Iterations Label Template")
+        iterationsLabel.stringValue = String(format: template, iterations)
+    }
+    
+    @IBAction func maxRotationChanged(_ sender: Any?) {
+        let value = maxRotationSlider.floatValue / 360.0
+        renderer.maxRotation = value
+        
+        let template = NSLocalizedString("Max Rotation: %iº", comment: "Max Rotation Label Template")
+        maxRotationLabel.stringValue = String(format: template, Int(maxRotationSlider.floatValue))
+    }
+    
+    @IBAction func scaleChanged(_ sender: Any?) {
+        let value = scaleSlider.floatValue
+        renderer.scale = value / 100.0
+        
+        let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
+        scaleLabel.stringValue = String(format: template, Int(value))
     }
     
     @IBAction func removeImage(_ sender: Any?) {
