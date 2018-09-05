@@ -14,7 +14,7 @@ fileprivate let ImageCollectionViewItemIdentifier = NSUserInterfaceItemIdentifie
 
 fileprivate let ImagesMainSection = 0
 
-class ViewController: NSViewController, NSCollectionViewDataSource, NSCollectionViewDelegate {
+class ViewController: NSViewController, NSCollectionViewDataSource, NSCollectionViewDelegate, NSTextFieldDelegate {
 
     // MARK: - Properties
     
@@ -31,6 +31,13 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     @IBOutlet weak var scaleLabel: NSTextField!
     @IBOutlet weak var scaleSlider: NSSlider!
+    
+    @IBOutlet weak var backgroundColorLabel: NSTextField!
+    @IBOutlet weak var backgroundColorWell: NSColorWell!
+    
+    @IBOutlet weak var resolutionLabel: NSTextField!
+    @IBOutlet weak var resolutionWidthTextField: NSTextField!
+    @IBOutlet weak var resolutionHeightTextField: NSTextField!
     
     @IBOutlet weak var metalView: MTKView!
     
@@ -66,6 +73,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 }
             }
         }
+    }
+    
+    @IBAction func backgroundColorChanged(_ sender: Any?) {
+        let color = backgroundColorWell.color
+        renderer.targetBackgroundColor = color
     }
     
     @IBAction func interationsChanged(_ sender: Any?) {
@@ -105,7 +117,6 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         imageCollectionView.deleteItems(at: indexes)
     }
-    
     
     // MARK: - NSViewController Methods
     
@@ -154,6 +165,25 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         setRemoveButtonState()
     }
     
+    // MARK: <NSTextFieldDelegate>
+    
+    override func controlTextDidChange(_ obj: Notification) {
+        guard let textField = obj.object as? NSTextField else {
+            return
+        }
+        
+        if textField == resolutionWidthTextField || textField == resolutionHeightTextField {
+            let width = resolutionWidthTextField.integerValue
+            let height = resolutionHeightTextField.integerValue
+            
+            guard width > 0, height > 0 else {
+                return
+            }
+            
+            let size = CGSize(width: width, height: height)
+            renderer.targetTextureSize = size
+        }
+    }
     
     // MARK: - Utilities
     

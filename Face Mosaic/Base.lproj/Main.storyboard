@@ -813,10 +813,10 @@
                                                 <rect key="frame" x="530" y="0.0" width="200" height="495"/>
                                                 <subviews>
                                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdv-sZ-orc">
-                                                        <rect key="frame" x="20" y="339" width="160" height="136"/>
+                                                        <rect key="frame" x="20" y="226" width="160" height="249"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WXL-z0-yPh">
-                                                                <rect key="frame" x="-2" y="119" width="105" height="17"/>
+                                                                <rect key="frame" x="-2" y="232" width="105" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Max Rotation: 0º" id="hIN-DU-lO3">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -824,14 +824,14 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hBq-L4-zpg">
-                                                                <rect key="frame" x="-2" y="94" width="96" height="19"/>
+                                                                <rect key="frame" x="-2" y="207" width="96" height="19"/>
                                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="180" tickMarkPosition="above" sliderType="linear" id="Pu2-6b-knB"/>
                                                                 <connections>
                                                                     <action selector="maxRotationChanged:" target="XfG-lQ-9wD" id="cGx-mS-Adr"/>
                                                                 </connections>
                                                             </slider>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XPq-m8-nUG">
-                                                                <rect key="frame" x="-2" y="71" width="75" height="17"/>
+                                                                <rect key="frame" x="-2" y="184" width="75" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Iterations: 1" id="yqV-L2-d4T">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -839,14 +839,14 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MQq-4f-oW2">
-                                                                <rect key="frame" x="-2" y="46" width="96" height="19"/>
-                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="l8c-4l-308"/>
+                                                                <rect key="frame" x="-2" y="159" width="96" height="19"/>
+                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="1000" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="l8c-4l-308"/>
                                                                 <connections>
                                                                     <action selector="interationsChanged:" target="XfG-lQ-9wD" id="4k4-Cz-3Bx"/>
                                                                 </connections>
                                                             </slider>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jWz-66-Ma2">
-                                                                <rect key="frame" x="-2" y="23" width="72" height="17"/>
+                                                                <rect key="frame" x="-2" y="136" width="72" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scale: 50%" id="ze9-lV-uwU">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -854,12 +854,87 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o4D-jT-jud">
-                                                                <rect key="frame" x="-2" y="-2" width="96" height="19"/>
+                                                                <rect key="frame" x="-2" y="111" width="96" height="19"/>
                                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="vG5-OL-zNB"/>
                                                                 <connections>
                                                                     <action selector="scaleChanged:" target="XfG-lQ-9wD" id="sfe-GN-QCv"/>
                                                                 </connections>
                                                             </slider>
+                                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6vP-7r-pYe">
+                                                                <rect key="frame" x="-2" y="88" width="117" height="17"/>
+                                                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Background Color:" id="wup-Bx-GKT">
+                                                                    <font key="font" metaFont="system"/>
+                                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                </textFieldCell>
+                                                            </textField>
+                                                            <colorWell translatesAutoresizingMaskIntoConstraints="NO" id="Qtr-iF-Mnq">
+                                                                <rect key="frame" x="0.0" y="55" width="160" height="25"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="25" id="dgp-zb-v4u"/>
+                                                                    <constraint firstAttribute="width" constant="160" id="ggQ-tC-WW9"/>
+                                                                </constraints>
+                                                                <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <connections>
+                                                                    <action selector="backgroundColorChanged:" target="XfG-lQ-9wD" id="3vg-bA-IYY"/>
+                                                                </connections>
+                                                            </colorWell>
+                                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bvh-s3-lf6">
+                                                                <rect key="frame" x="-2" y="30" width="72" height="17"/>
+                                                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Resolution:" id="a6f-rx-JII">
+                                                                    <font key="font" metaFont="system"/>
+                                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                </textFieldCell>
+                                                            </textField>
+                                                            <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="agm-i7-uLj">
+                                                                <rect key="frame" x="0.0" y="0.0" width="160" height="22"/>
+                                                                <subviews>
+                                                                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oB6-2E-G7c">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="69" height="22"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="640" drawsBackground="YES" id="NVj-Wv-q2c">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                        <connections>
+                                                                            <outlet property="delegate" destination="XfG-lQ-9wD" id="bc1-mv-XQh"/>
+                                                                        </connections>
+                                                                    </textField>
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ty5-Kv-IGj">
+                                                                        <rect key="frame" x="75" y="5" width="11" height="17"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="x" id="uiq-fJ-Rs8">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                    </textField>
+                                                                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nja-tB-P8J">
+                                                                        <rect key="frame" x="92" y="0.0" width="68" height="22"/>
+                                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="480" drawsBackground="YES" id="WEK-qd-GEh">
+                                                                            <font key="font" metaFont="system"/>
+                                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                        </textFieldCell>
+                                                                        <connections>
+                                                                            <outlet property="delegate" destination="XfG-lQ-9wD" id="g2F-cu-aGk"/>
+                                                                        </connections>
+                                                                    </textField>
+                                                                </subviews>
+                                                                <constraints>
+                                                                    <constraint firstItem="oB6-2E-G7c" firstAttribute="width" secondItem="Nja-tB-P8J" secondAttribute="width" id="gAk-OC-XkH"/>
+                                                                </constraints>
+                                                                <visibilityPriorities>
+                                                                    <integer value="1000"/>
+                                                                    <integer value="1000"/>
+                                                                    <integer value="1000"/>
+                                                                </visibilityPriorities>
+                                                                <customSpacing>
+                                                                    <real value="3.4028234663852886e+38"/>
+                                                                    <real value="3.4028234663852886e+38"/>
+                                                                    <real value="3.4028234663852886e+38"/>
+                                                                </customSpacing>
+                                                            </stackView>
                                                         </subviews>
                                                         <visibilityPriorities>
                                                             <integer value="1000"/>
@@ -868,8 +943,16 @@
                                                             <integer value="1000"/>
                                                             <integer value="1000"/>
                                                             <integer value="1000"/>
+                                                            <integer value="1000"/>
+                                                            <integer value="1000"/>
+                                                            <integer value="1000"/>
+                                                            <integer value="1000"/>
                                                         </visibilityPriorities>
                                                         <customSpacing>
+                                                            <real value="3.4028234663852886e+38"/>
+                                                            <real value="3.4028234663852886e+38"/>
+                                                            <real value="3.4028234663852886e+38"/>
+                                                            <real value="3.4028234663852886e+38"/>
                                                             <real value="3.4028234663852886e+38"/>
                                                             <real value="3.4028234663852886e+38"/>
                                                             <real value="3.4028234663852886e+38"/>
@@ -914,6 +997,8 @@
                     </view>
                     <connections>
                         <outlet property="addImageButton" destination="JRy-AE-BbC" id="FL8-qk-iJn"/>
+                        <outlet property="backgroundColorLabel" destination="6vP-7r-pYe" id="OpG-Kg-Ch2"/>
+                        <outlet property="backgroundColorWell" destination="Qtr-iF-Mnq" id="DAn-fO-2X4"/>
                         <outlet property="imageCollectionView" destination="yp0-0B-d5K" id="aBs-0A-iYW"/>
                         <outlet property="iterationsLabel" destination="XPq-m8-nUG" id="kxd-cH-fJf"/>
                         <outlet property="iterationsSlider" destination="MQq-4f-oW2" id="Ine-hI-mcf"/>
@@ -921,13 +1006,16 @@
                         <outlet property="maxRotationSlider" destination="hBq-L4-zpg" id="NQ6-oL-4cs"/>
                         <outlet property="metalView" destination="xbA-lW-K6q" id="zxB-5U-ykn"/>
                         <outlet property="removeImageButton" destination="QIZ-ic-aMV" id="8CR-6J-tS0"/>
+                        <outlet property="resolutionHeightTextField" destination="Nja-tB-P8J" id="gOa-03-e2H"/>
+                        <outlet property="resolutionLabel" destination="bvh-s3-lf6" id="Mtq-3S-iuP"/>
+                        <outlet property="resolutionWidthTextField" destination="oB6-2E-G7c" id="yup-iD-xeU"/>
                         <outlet property="scaleLabel" destination="jWz-66-Ma2" id="yAE-CD-tGg"/>
                         <outlet property="scaleSlider" destination="o4D-jT-jud" id="cVd-21-lO4"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="334.5" y="705.5"/>
+            <point key="canvasLocation" x="75.5" y="822.5"/>
         </scene>
     </scenes>
     <resources>

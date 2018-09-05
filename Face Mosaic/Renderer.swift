@@ -25,14 +25,18 @@ class Renderer: NSObject, MTKViewDelegate {
         
         var state: Face.State
         var texture: MTLTexture?
-        var vertices: [StandardVertex]
-        var vertexBuffer: MTLBuffer?
+        var scalingMatrix: float4x4?
     }
     
     fileprivate struct FaceVertexUniform {
-        var translationMatrix: float4x4
-        var rotationMatrix: float4x4
-        var scalingMatrix: float4x4
+        let translationMatrix: float4x4
+        let rotationMatrix: float4x4
+        let scalingMatrix: float4x4
+    }
+    
+    fileprivate struct TargetVertex {
+        let position: float2
+        let texturePosition: float2
     }
     
     fileprivate struct StandardVertex {
@@ -52,33 +56,41 @@ class Renderer: NSObject, MTKViewDelegate {
     private var targetVertexBuffer: MTLBuffer
     
     private let commandQueue: MTLCommandQueue
-    private let pipelineState: MTLRenderPipelineState
+    private let facePipelineState: MTLRenderPipelineState
     private let textureLoader: MTKTextureLoader
     
     private var faces: [Face] = []
-    private let faceTextureBuffer: MTLBuffer
     
     private var seedData: Data = "Seed".data(using: .utf8)! {
         didSet {
-            targetTextureNeedsRendered = true
+            if (seedData != oldValue) {
+                targetTextureNeedsRendered = true
+            }
         }
     }
     
     var iterations: Int = 1 {
         didSet {
-            targetTextureNeedsRendered = true
+            if iterations != oldValue {
+                targetTextureNeedsRendered = true
+            }
         }
     }
     
     var maxRotation: Float = 0.0 {
         didSet {
-            targetTextureNeedsRendered = true
+            if maxRotation != oldValue {
+                targetTextureNeedsRendered = true
+            }
         }
     }
     
     var scale: Float = 0.50 {
         didSet {
-            targetTextureNeedsRendered = true
+            if scale != oldValue {
+                scalesNeedCalculated = true
+                targetTextureNeedsRendered = true
+            }
         }
     }
     
@@ -90,6 +102,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var targetTextureSize: CGSize = CGSize(width: 640.0, height: 480.0) {
         didSet {
+            scalesNeedCalculated = true
             targetTextureNeedsRebuilt = true
             sceneNeedsLayedOut = true
         }
@@ -97,6 +110,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var sceneSize:  CGSize = CGSize.zero {
         didSet {
+            scalesNeedCalculated = true
             sceneNeedsLayedOut = true
         }
     }
@@ -104,6 +118,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var targetTextureNeedsRebuilt: Bool = true
     var targetTextureNeedsRendered: Bool = true
     var sceneNeedsLayedOut: Bool = true
+    var scalesNeedCalculated: Bool = true
     
     
     // MARK: - Initialization
@@ -116,24 +131,24 @@ class Renderer: NSObject, MTKViewDelegate {
         // Load the shaders in to a pipeline
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
         
-        let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-        pipelineStateDescriptor.label = "Main Pipeline"
-        pipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(name: "standard_vertex")
-        pipelineStateDescriptor.fragmentFunction = defaultLibrary.makeFunction(name: "standard_fragment")
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
-        pipelineStateDescriptor.colorAttachments[0].isBlendingEnabled = true
-        pipelineStateDescriptor.colorAttachments[0].rgbBlendOperation = .add
-        pipelineStateDescriptor.colorAttachments[0].alphaBlendOperation = .add
-        pipelineStateDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        pipelineStateDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
-        pipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-        pipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        let facePipelineStateDescriptor = MTLRenderPipelineDescriptor()
+        facePipelineStateDescriptor.label = "Face Pipeline"
+        facePipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(name: "face_vertex")
+        facePipelineStateDescriptor.fragmentFunction = defaultLibrary.makeFunction(name: "face_fragment")
+        facePipelineStateDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
+        facePipelineStateDescriptor.colorAttachments[0].isBlendingEnabled = true
+        facePipelineStateDescriptor.colorAttachments[0].rgbBlendOperation = .add
+        facePipelineStateDescriptor.colorAttachments[0].alphaBlendOperation = .add
+        facePipelineStateDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        facePipelineStateDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
+        facePipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        facePipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
         
-        pipelineState = try! metalDevice.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+        facePipelineState = try! metalDevice.makeRenderPipelineState(descriptor: facePipelineStateDescriptor)
         
         let targetPipelineStateDescriptor = MTLRenderPipelineDescriptor()
         targetPipelineStateDescriptor.label = "Target Pipeline"
-        targetPipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(name: "standard_vertex")
+        targetPipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(name: "target_vertex")
         targetPipelineStateDescriptor.fragmentFunction = defaultLibrary.makeFunction(name: "target_fragment")
         targetPipelineStateDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
         targetPipelineStateDescriptor.colorAttachments[0].isBlendingEnabled = true
@@ -152,24 +167,13 @@ class Renderer: NSObject, MTKViewDelegate {
         
         // Build a vertex buffer for the target
         let vertices = [
-            StandardVertex(x: -1.0, y:  1.0, s: 0.0, t: 0.0),
-            StandardVertex(x:  1.0, y:  1.0, s: 1.0, t: 0.0),
-            StandardVertex(x: -1.0, y: -1.0, s: 0.0, t: 1.0),
-            StandardVertex(x:  1.0, y: -1.0, s: 1.0, t: 1.0),
+            TargetVertex(position: float2(-1.0,  1.0), texturePosition: float2(0.0, 0.0)),
+            TargetVertex(position: float2( 1.0,  1.0), texturePosition: float2(1.0, 0.0)),
+            TargetVertex(position: float2(-1.0, -1.0), texturePosition: float2(0.0, 1.0)),
+            TargetVertex(position: float2( 1.0, -1.0), texturePosition: float2(1.0, 1.0))
         ]
         
-        let verticesData = vertices.reduce([]) { $0 + $1.floatBuffer }
-        targetVertexBuffer = metalDevice.makeBuffer(bytes: verticesData, length: MemoryLayout<Float>.size * verticesData.count, options: [])!
-        
-        // Build a common buffer to store texture mapping vertices
-        let faceTextureBufferData: [Float] = [
-            0.0, 0.0,
-            1.0, 0.0,
-            0.0, 1.0,
-            1.0, 1.0
-        ]
-        
-        faceTextureBuffer = metalDevice.makeBuffer(bytes: faceTextureBufferData, length: MemoryLayout<Float>.size * faceTextureBufferData.count, options: [])!
+        targetVertexBuffer = metalDevice.makeBuffer(bytes: vertices, length: MemoryLayout<TargetVertex>.size * vertices.count, options: [])!
         
         // Build a texture loader
         textureLoader = MTKTextureLoader(device: metalDevice)
@@ -182,13 +186,7 @@ class Renderer: NSObject, MTKViewDelegate {
             url: url,
             state: .new,
             texture: nil,
-            vertices: [
-                StandardVertex(x: -1.0, y:  1.0, s: 0.0, t: 0.0),
-                StandardVertex(x:  1.0, y:  1.0, s: 1.0, t: 0.0),
-                StandardVertex(x: -1.0, y: -1.0, s: 0.0, t: 1.0),
-                StandardVertex(x:  1.0, y: -1.0, s: 1.0, t: 1.0)
-            ],
-            vertexBuffer: nil
+            scalingMatrix: nil
         )
         
         faces.append(face)
@@ -230,6 +228,25 @@ class Renderer: NSObject, MTKViewDelegate {
             fatalError("Attempted to render faces without a target")
         }
         
+        // Recalculate scaling matrices if needed
+        for idx in 0 ..< faces.count {
+            if faces[idx].texture != nil && faces[idx].scalingMatrix == nil {
+                var face = faces[idx]
+                let texture = face.texture!
+                
+                let sceneSize = float2(Float(targetTextureSize.width), Float(targetTextureSize.height))
+                let textureSize = float2(Float(texture.width), Float(texture.height))
+                let availableSize = sceneSize * scale
+                let delta = availableSize / textureSize
+                let factor = delta.min()!
+                let scaledSize = textureSize * factor
+                let normalizedSize = (scaledSize / sceneSize) / 2.0
+                
+                face.scalingMatrix = float4x4(scaledBy: float3(normalizedSize[0], normalizedSize[1], 1.0))
+                faces[idx] = face
+            }
+        }
+        
         // Build a seeded random number generate to determine the position and rotation
         let rng = GKARC4RandomSource(seed: seedData)
         
@@ -242,31 +259,17 @@ class Renderer: NSObject, MTKViewDelegate {
                 let rotation = rng.nextUniform() * maxRotation
                 let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
                 
-                print("Modification: \(translateX)x\(translateY) - \(rotation)")
-                
                 // Build the matrix
                 let translationMatrix = float4x4(translationBy: float3(translateX, translateY, 0))
                 let rotationMatrix = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: Float.pi * 2.0 * (rotation * rotationMultiplier))
                 
-                let scalingMatrix: float4x4
-                if let texture = face.texture {
-                    let sceneSize = float2(Float(self.sceneSize.width), Float(self.sceneSize.height))
-                    let textureSize = float2(Float(texture.width), Float(texture.height))
-                    let availableSize = sceneSize * scale
-                    let delta = availableSize / textureSize
-                    let factor = delta.min()!
-                    let scaledSize = textureSize * factor
-                    let normalizedSize = (scaledSize / sceneSize) / 2.0
-                    scalingMatrix = float4x4(scaledBy: float3(normalizedSize[0], normalizedSize[1], 1.0))
-                } else {
-                    scalingMatrix = float4x4.initIdentity()
-                }
+                let scalingMatrix = face.scalingMatrix ?? float4x4.initIdentity()
                 
                 // Build the uniform
                 var uniform = FaceVertexUniform(translationMatrix: translationMatrix, rotationMatrix: rotationMatrix, scalingMatrix: scalingMatrix)
                 
                 // Skip if we don't have a texture or vertex buffer yet
-                guard let texture = face.texture, let vertexBuffer = face.vertexBuffer else {
+                guard let texture = face.texture else {
                     continue
                 }
                 
@@ -276,10 +279,8 @@ class Renderer: NSObject, MTKViewDelegate {
                 renderPassDescriptor.colorAttachments[0].storeAction = .store
                 
                 let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-                encoder.setRenderPipelineState(targetPipelineState)
-                encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-                encoder.setVertexBuffer(faceTextureBuffer, offset: 0, index: 1)
-                encoder.setVertexBytes(&uniform, length: MemoryLayout<FaceVertexUniform>.size, index: 2)
+                encoder.setRenderPipelineState(facePipelineState)
+                encoder.setVertexBytes(&uniform, length: MemoryLayout<FaceVertexUniform>.size, index: 0)
                 encoder.setFragmentTexture(texture, index: 0)
                 encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
                 encoder.endEncoding()
@@ -329,8 +330,34 @@ class Renderer: NSObject, MTKViewDelegate {
             return
         }
         
+        // Re-layout if needed
+        if sceneNeedsLayedOut {
+            let sceneSize = float2(Float(self.sceneSize.width), Float(self.sceneSize.height))
+            let textureSize = float2(Float(targetTextureSize.width), Float(targetTextureSize.height))
+            let delta = sceneSize / textureSize
+            let factor = delta.min()!
+            let scaledSize = textureSize * factor
+            let normalizedSize = (scaledSize / sceneSize)
+            let normalizedOffsets = (sceneSize - scaledSize) / 2.0
+            
+            print("Scene \(textureSize) in \(sceneSize)")
+            print("Normalized \(normalizedSize) - \(normalizedOffsets)")
+            
+            sceneNeedsLayedOut = false
+        }
+        
+        if scalesNeedCalculated {
+            for idx in 0 ..< faces.count {
+                var face = faces[idx]
+                face.scalingMatrix = nil
+                faces[idx] = face
+            }
+            
+            scalesNeedCalculated = false
+        }
+        
         // Rebuild the target texture if needed
-        if (targetTextureNeedsRebuilt) {
+        if targetTextureNeedsRebuilt {
             buildTargetTexture()
             targetTextureNeedsRendered = true
             targetTextureNeedsRebuilt = false
@@ -340,12 +367,7 @@ class Renderer: NSObject, MTKViewDelegate {
         for idx in 0 ..< faces.count {
             var face = faces[idx]
             
-            if face.vertexBuffer == nil {
-                let data: [Float] = face.vertices.reduce([]) { $0 + $1.floatBuffer }
-                face.vertexBuffer = metalDevice.makeBuffer(bytes: data, length: MemoryLayout<Float>.size * data.count, options: [])
-            }
-            
-            if face.texture == nil {
+            if face.texture == nil && face.state == .new {
                 face.state = .loading
                 
                 let options: [MTKTextureLoader.Option:Any] = [
@@ -397,13 +419,9 @@ class Renderer: NSObject, MTKViewDelegate {
         
         // Render the scene
         if let texture = targetTexture {
-            var uniform = FaceVertexUniform(translationMatrix: float4x4.initIdentity(), rotationMatrix:  float4x4.initIdentity(), scalingMatrix: float4x4.initIdentity())
-            
             let targetEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-            targetEncoder.setRenderPipelineState(pipelineState)
+            targetEncoder.setRenderPipelineState(targetPipelineState)
             targetEncoder.setVertexBuffer(targetVertexBuffer, offset: 0, index: 0)
-            targetEncoder.setVertexBuffer(faceTextureBuffer, offset: 0, index: 1)
-            targetEncoder.setVertexBytes(&uniform, length: MemoryLayout<FaceVertexUniform>.size, index: 2)
             targetEncoder.setFragmentTexture(texture, index: 0)
             targetEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
             targetEncoder.endEncoding()
