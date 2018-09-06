@@ -218,7 +218,7 @@ class Renderer: NSObject, MTKViewDelegate {
                 let delta = availableSize / textureSize
                 let factor = delta.min()!
                 let scaledSize = textureSize * factor
-                let normalizedSize = (scaledSize / sceneSize) / 2.0
+                let normalizedSize = (scaledSize / sceneSize)
                 
                 face.scalingMatrix = float4x4(scaledBy: float3(normalizedSize[0], normalizedSize[1], 1.0))
                 faces[idx] = face
