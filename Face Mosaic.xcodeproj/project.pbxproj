@@ -20,6 +20,8 @@
 		D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5C213F3B83003F6888 /* Metal.framework */; };
 		D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5F213F3B8A003F6888 /* GameKit.framework */; };
 		D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */; };
+		D186719B2141DB94008FF5E4 /* BackgroundColorWell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */; };
+		D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,8 @@
 		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float4x4+geometry.swift"; sourceTree = "<group>"; };
+		D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorWell.swift; sourceTree = "<group>"; };
+		D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +91,8 @@
 				D12B5626213C5180005B65D5 /* Shaders.metal */,
 				D12B5628213CC626005B65D5 /* Renderer.swift */,
 				D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */,
+				D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */,
+				D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */,
 			);
 			path = "Face Mosaic";
 			sourceTree = "<group>";
@@ -172,6 +178,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */,
 				D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */,
 				D12B5627213C5180005B65D5 /* Shaders.metal in Sources */,
 				D12B560F213B4F70005B65D5 /* ViewController.swift in Sources */,
@@ -179,6 +186,7 @@
 				D12B560D213B4F70005B65D5 /* AppDelegate.swift in Sources */,
 				D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */,
 				D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */,
+				D186719B2141DB94008FF5E4 /* BackgroundColorWell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

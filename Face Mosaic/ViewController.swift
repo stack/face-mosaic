@@ -33,7 +33,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     @IBOutlet weak var scaleSlider: NSSlider!
     
     @IBOutlet weak var backgroundColorLabel: NSTextField!
-    @IBOutlet weak var backgroundColorWell: NSColorWell!
+    @IBOutlet weak var backgroundColorButton: ColorPickerButton!
+    private var backgroundColorPanel: NSColorPanel = NSColorPanel()
     
     @IBOutlet weak var resolutionLabel: NSTextField!
     @IBOutlet weak var resolutionWidthTextField: NSTextField!
@@ -74,12 +75,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             }
         }
     }
-    
-    @IBAction func backgroundColorChanged(_ sender: Any?) {
-        let color = backgroundColorWell.color
-        renderer.targetBackgroundColor = color
-    }
-    
+
     @IBAction func interationsChanged(_ sender: Any?) {
         let iterations = iterationsSlider.integerValue
         renderer.iterations = iterations
@@ -96,14 +92,6 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         maxRotationLabel.stringValue = String(format: template, Int(maxRotationSlider.floatValue))
     }
     
-    @IBAction func scaleChanged(_ sender: Any?) {
-        let value = scaleSlider.floatValue
-        renderer.scale = value / 100.0
-        
-        let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
-        scaleLabel.stringValue = String(format: template, Int(value))
-    }
-    
     @IBAction func removeImage(_ sender: Any?) {
         let indexes = imageCollectionView.selectionIndexPaths
         let sortedIndexes = indexes
@@ -118,6 +106,26 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         imageCollectionView.deleteItems(at: indexes)
     }
     
+    @IBAction func scaleChanged(_ sender: Any?) {
+        let value = scaleSlider.floatValue
+        renderer.scale = value / 100.0
+        
+        let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
+        scaleLabel.stringValue = String(format: template, Int(value))
+    }
+    
+    @IBAction func toggleBackgroundColorPicker(_ sender: Any?) {
+        if backgroundColorPanel.isVisible {
+            backgroundColorPanel.close()
+        } else {
+            backgroundColorPanel.color = backgroundColorButton.selectedColor
+            backgroundColorPanel.title = NSLocalizedString("Background Color Picker", comment: "Background Color Picker Title")
+            backgroundColorPanel.showsAlpha = true
+            
+            backgroundColorPanel.makeKeyAndOrderFront(nil)
+        }
+    }
+    
     // MARK: - NSViewController Methods
     
     override func viewDidLoad() {
@@ -129,6 +137,12 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         renderer = Renderer(metalView: metalView)
         renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
         metalView.delegate = renderer
+        
+        // Listen for color changes from the background color picker
+        NotificationCenter.default.addObserver(forName: NSColorPanel.colorDidChangeNotification, object: backgroundColorPanel, queue: nil) { (notification) in
+            self.backgroundColorButton.selectedColor = self.backgroundColorPanel.color
+            self.renderer.targetBackgroundColor = self.backgroundColorPanel.color
+        }
         
         // Update the initial UI elements
         setRemoveButtonState()
