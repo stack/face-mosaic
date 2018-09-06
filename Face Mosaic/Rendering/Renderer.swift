@@ -279,9 +279,9 @@ class Renderer: NSObject, MTKViewDelegate {
         renderPassDescriptor.colorAttachments[0].texture = texture
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
-            red: Double(blue),
+            red: Double(red),
             green: Double(green),
-            blue: Double(red),
+            blue: Double(blue),
             alpha: Double(alpha)
         )
         renderPassDescriptor.colorAttachments[0].storeAction = .store

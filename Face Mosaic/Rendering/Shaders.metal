@@ -24,10 +24,10 @@ struct StandardVertexOut {
     float2 texturePosition;
 };
 
-vertex StandardVertexOut face_vertex(
-                                     const device FaceVertexUniformIn& uniform [[ buffer(0) ]],
+vertex StandardVertexOut face_vertex(const device FaceVertexUniformIn& uniform [[ buffer(0) ]],
                                      ushort vid [[ vertex_id ]],
-                                     ushort iid [[ instance_id ]]) {
+                                     ushort iid [[ instance_id ]])
+{
     constexpr float4 vertices[4] = {
         float4(-1.0,  1.0, 0.0, 1.0),
         float4( 1.0,  1.0, 0.0, 1.0),
@@ -49,18 +49,24 @@ vertex StandardVertexOut face_vertex(
     return vertexOut;
 }
 
-fragment float4 face_fragment(
-                                  StandardVertexOut face_vertex [[ stage_in ]],
-                                  texture2d<float, access::sample> texture) {
-    constexpr sampler texture_sampler (mag_filter::linear, min_filter::linear, s_address::clamp_to_edge, t_address::clamp_to_edge, r_address::clamp_to_edge);
+fragment float4 face_fragment(StandardVertexOut face_vertex [[ stage_in ]],
+                              texture2d<float, access::sample> texture)
+{
+    constexpr sampler texture_sampler(
+                                      mag_filter::linear,
+                                      min_filter::linear,
+                                      s_address::clamp_to_edge,
+                                      t_address::clamp_to_edge,
+                                      r_address::clamp_to_edge);
     
-    return texture.sample(texture_sampler, face_vertex.texturePosition);
+    return texture.sample(texture_sampler, face_vertex.texturePosition).zyxw;
 }
 
 
 vertex StandardVertexOut target_vertex(const device TargetVertexIn* vertices [[ buffer(0) ]],
-                                         ushort vid [[ vertex_id ]],
-                                         ushort iid [[ instance_id ]]) {
+                                       ushort vid [[ vertex_id ]],
+                                       ushort iid [[ instance_id ]])
+{
     constexpr float2 texturePositions[4] = {
         float2(0.0, 0.0),
         float2(1.0, 0.0),
@@ -77,10 +83,10 @@ vertex StandardVertexOut target_vertex(const device TargetVertexIn* vertices [[ 
     return vertexOut;
 }
 
-fragment float4 target_fragment(
-                                StandardVertexOut face_vertex [[ stage_in ]],
-                                texture2d<float, access::sample> texture) {
+fragment float4 target_fragment(StandardVertexOut face_vertex [[ stage_in ]],
+                                texture2d<float, access::sample> texture)
+{
     constexpr sampler texture_sampler (mag_filter::linear, min_filter::linear, s_address::clamp_to_edge, t_address::clamp_to_edge, r_address::clamp_to_edge);
     
-    return texture.sample(texture_sampler, face_vertex.texturePosition).zyxw;
+    return texture.sample(texture_sampler, face_vertex.texturePosition);
 }
