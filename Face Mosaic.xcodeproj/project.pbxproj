@@ -13,14 +13,12 @@
 		D12B5614213B4F72005B65D5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D12B5612213B4F72005B65D5 /* Main.storyboard */; };
 		D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */; };
 		D12B5621213B5564005B65D5 /* ImageCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */; };
-		D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */; };
 		D12B5627213C5180005B65D5 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D12B5626213C5180005B65D5 /* Shaders.metal */; };
 		D12B5629213CC626005B65D5 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5628213CC626005B65D5 /* Renderer.swift */; };
 		D1833F5D213F3B83003F6888 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5B213F3B83003F6888 /* MetalKit.framework */; };
 		D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5C213F3B83003F6888 /* Metal.framework */; };
 		D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5F213F3B8A003F6888 /* GameKit.framework */; };
 		D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */; };
-		D186719B2141DB94008FF5E4 /* BackgroundColorWell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */; };
 		D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */; };
 /* End PBXBuildFile section */
 
@@ -34,14 +32,12 @@
 		D12B5616213B4F72005B65D5 /* Face_Mosaic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Face_Mosaic.entitlements; sourceTree = "<group>"; };
 		D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewItem.swift; sourceTree = "<group>"; };
 		D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImageCollectionViewItem.xib; sourceTree = "<group>"; };
-		D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionView.swift; sourceTree = "<group>"; };
 		D12B5626213C5180005B65D5 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		D12B5628213CC626005B65D5 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		D1833F5B213F3B83003F6888 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float4x4+geometry.swift"; sourceTree = "<group>"; };
-		D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorWell.swift; sourceTree = "<group>"; };
 		D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,20 +75,15 @@
 		D12B560B213B4F70005B65D5 /* Face Mosaic */ = {
 			isa = PBXGroup;
 			children = (
+				D12B5610213B4F72005B65D5 /* Assets.xcassets */,
+				D18671A02141E5CA008FF5E4 /* Extensions */,
+				D186719F2141E5B4008FF5E4 /* Rendering */,
+				D186719E2141E58D008FF5E4 /* Views */,
 				D12B560C213B4F70005B65D5 /* AppDelegate.swift */,
 				D12B560E213B4F70005B65D5 /* ViewController.swift */,
-				D12B5610213B4F72005B65D5 /* Assets.xcassets */,
 				D12B5612213B4F72005B65D5 /* Main.storyboard */,
 				D12B5615213B4F72005B65D5 /* Info.plist */,
 				D12B5616213B4F72005B65D5 /* Face_Mosaic.entitlements */,
-				D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */,
-				D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */,
-				D12B5622213B57A9005B65D5 /* ImageCollectionView.swift */,
-				D12B5626213C5180005B65D5 /* Shaders.metal */,
-				D12B5628213CC626005B65D5 /* Renderer.swift */,
-				D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */,
-				D186719A2141DB94008FF5E4 /* BackgroundColorWell.swift */,
-				D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */,
 			);
 			path = "Face Mosaic";
 			sourceTree = "<group>";
@@ -105,6 +96,33 @@
 				D1833F5B213F3B83003F6888 /* MetalKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D186719E2141E58D008FF5E4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */,
+				D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */,
+				D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D186719F2141E5B4008FF5E4 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				D12B5628213CC626005B65D5 /* Renderer.swift */,
+				D12B5626213C5180005B65D5 /* Shaders.metal */,
+			);
+			path = Rendering;
+			sourceTree = "<group>";
+		};
+		D18671A02141E5CA008FF5E4 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -184,9 +202,7 @@
 				D12B560F213B4F70005B65D5 /* ViewController.swift in Sources */,
 				D12B5629213CC626005B65D5 /* Renderer.swift in Sources */,
 				D12B560D213B4F70005B65D5 /* AppDelegate.swift in Sources */,
-				D12B5623213B57A9005B65D5 /* ImageCollectionView.swift in Sources */,
 				D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */,
-				D186719B2141DB94008FF5E4 /* BackgroundColorWell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
