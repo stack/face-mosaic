@@ -17,7 +17,6 @@ struct FaceVertexUniformIn {
 
 struct TargetVertexIn {
     packed_float2 position;
-    packed_float2 texturePosition;
 };
 
 struct StandardVertexOut {
@@ -62,11 +61,18 @@ fragment float4 face_fragment(
 vertex StandardVertexOut target_vertex(const device TargetVertexIn* vertices [[ buffer(0) ]],
                                          ushort vid [[ vertex_id ]],
                                          ushort iid [[ instance_id ]]) {
+    constexpr float2 texturePositions[4] = {
+        float2(0.0, 0.0),
+        float2(1.0, 0.0),
+        float2(0.0, 1.0),
+        float2(1.0, 1.0)
+    };
+    
     TargetVertexIn vertexIn = vertices[vid];
     
     StandardVertexOut vertexOut;
     vertexOut.position = float4(vertexIn.position, 0.0, 1.0);
-    vertexOut.texturePosition = vertexIn.texturePosition;
+    vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
 }

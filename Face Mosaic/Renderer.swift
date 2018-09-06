@@ -36,16 +36,6 @@ class Renderer: NSObject, MTKViewDelegate {
     
     fileprivate struct TargetVertex {
         let position: float2
-        let texturePosition: float2
-    }
-    
-    fileprivate struct StandardVertex {
-        let x, y: Float
-        let s, t: Float
-        
-        var floatBuffer: [Float] {
-            return [x, y, s, t]
-        }
     }
     
     private let metalDevice: MTLDevice
@@ -167,10 +157,10 @@ class Renderer: NSObject, MTKViewDelegate {
         
         // Build a vertex buffer for the target
         let vertices = [
-            TargetVertex(position: float2(-1.0,  1.0), texturePosition: float2(0.0, 0.0)),
-            TargetVertex(position: float2( 1.0,  1.0), texturePosition: float2(1.0, 0.0)),
-            TargetVertex(position: float2(-1.0, -1.0), texturePosition: float2(0.0, 1.0)),
-            TargetVertex(position: float2( 1.0, -1.0), texturePosition: float2(1.0, 1.0))
+            TargetVertex(position: float2(-1.0,  1.0)),
+            TargetVertex(position: float2( 1.0,  1.0)),
+            TargetVertex(position: float2(-1.0, -1.0)),
+            TargetVertex(position: float2( 1.0, -1.0))
         ]
         
         targetVertexBuffer = metalDevice.makeBuffer(bytes: vertices, length: MemoryLayout<TargetVertex>.size * vertices.count, options: [])!
@@ -208,18 +198,6 @@ class Renderer: NSObject, MTKViewDelegate {
         textureDescriptor.usage = [.renderTarget, .shaderRead]
         
         targetTexture = metalDevice.makeTexture(descriptor: textureDescriptor)!
-    }
-    
-    private func buildTargetTextureVertexBuffer() {
-        let vertices = [
-            StandardVertex(x: -1.0, y:  1.0, s: 0.0, t: 0.0),
-            StandardVertex(x:  1.0, y:  1.0, s: 1.0, t: 0.0),
-            StandardVertex(x: -1.0, y: -1.0, s: 0.0, t: 1.0),
-            StandardVertex(x:  1.0, y: -1.0, s: 1.0, t: 1.0),
-        ]
-        
-        let verticesData = vertices.reduce([]) { $0 + $1.floatBuffer }
-        targetVertexBuffer = metalDevice.makeBuffer(bytes: verticesData, length: MemoryLayout<Float>.size * verticesData.count, options: [])!
     }
     
     private func renderFaces(commandBuffer: MTLCommandBuffer) {
@@ -337,11 +315,19 @@ class Renderer: NSObject, MTKViewDelegate {
             let delta = sceneSize / textureSize
             let factor = delta.min()!
             let scaledSize = textureSize * factor
-            let normalizedSize = (scaledSize / sceneSize)
-            let normalizedOffsets = (sceneSize - scaledSize) / 2.0
+            let scaledOffsets = (sceneSize - scaledSize) / 2.0
             
-            print("Scene \(textureSize) in \(sceneSize)")
-            print("Normalized \(normalizedSize) - \(normalizedOffsets)")
+            let leftBottomOffset = (scaledOffsets / sceneSize) * 2.0 - float2(1.0)
+            let rightTopOffset = ((sceneSize - scaledOffsets) / sceneSize) * 2.0 - float2(1.0)
+            
+            let vertices: [TargetVertex] = [
+                TargetVertex(position: float2(leftBottomOffset[0], rightTopOffset[1])),
+                TargetVertex(position: float2(rightTopOffset[0],   rightTopOffset[1])),
+                TargetVertex(position: float2(leftBottomOffset[0], leftBottomOffset[1])),
+                TargetVertex(position: float2(rightTopOffset[0],   leftBottomOffset[1]))
+            ]
+            
+            memcpy(targetVertexBuffer.contents(), vertices, MemoryLayout<TargetVertex>.size * vertices.count)
             
             sceneNeedsLayedOut = false
         }
