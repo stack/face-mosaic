@@ -77,7 +77,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
 
     @IBAction func interationsChanged(_ sender: Any?) {
-        let iterations = iterationsSlider.integerValue
+        let iterations = UInt(iterationsSlider.integerValue)
         renderer.iterations = iterations
         
         let template = NSLocalizedString("Iterations: %i", comment: "Iterations Label Template")
@@ -134,14 +134,14 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         // Prepare the renderer
         metalView.device = MTLCreateSystemDefaultDevice()
         
-        renderer = Renderer(metalView: metalView)
+        renderer = OriginalRenderer(metalView: metalView)
         renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
         metalView.delegate = renderer
         
         // Listen for color changes from the background color picker
         NotificationCenter.default.addObserver(forName: NSColorPanel.colorDidChangeNotification, object: backgroundColorPanel, queue: nil) { (notification) in
             self.backgroundColorButton.selectedColor = self.backgroundColorPanel.color
-            self.renderer.targetBackgroundColor = self.backgroundColorPanel.color
+            self.renderer.backgroundColor = self.backgroundColorPanel.color
         }
         
         // Update the initial UI elements
@@ -195,7 +195,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             }
             
             let size = CGSize(width: width, height: height)
-            renderer.targetTextureSize = size
+            renderer.canvasSize = size
         }
     }
     
