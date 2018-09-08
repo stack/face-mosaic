@@ -40,6 +40,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     @IBOutlet weak var resolutionWidthTextField: NSTextField!
     @IBOutlet weak var resolutionHeightTextField: NSTextField!
     
+    @IBOutlet weak var seedTextField: NSTextField!
+    
     @IBOutlet weak var metalView: MTKView!
     
     var imageURLs: [URL] = []
@@ -197,6 +199,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             
             let size = CGSize(width: width, height: height)
             renderer.canvasSize = size
+        } else if textField == seedTextField {
+            let seed = seedTextField.stringValue.isEmpty ? "Seed" : seedTextField.stringValue
+            let data = seed.data(using: .utf8)!
+            
+            renderer.seedData = data
         }
     }
     
