@@ -71,17 +71,28 @@ class IterationRenderer: NSObject, Renderer {
     }
     
     var iterations: UInt = 1 {
-        didSet { canvasIsDirty = true }
+        didSet {
+            if iterations != oldValue {
+                canvasIsDirty = true
+            }
+        }
     }
     
     var maxRotation: Float = 0.0 {
-        didSet { canvasIsDirty = true }
+        didSet {
+            if maxRotation != oldValue {
+                canvasIsDirty = true
+                
+            }
+        }
     }
     
     var scale: Float = 0.5 {
         didSet {
-            recalculateScale = true
-            canvasIsDirty = true
+            if scale != oldValue {
+                recalculateScale = true
+                canvasIsDirty = true
+            }
         }
     }
     
@@ -90,7 +101,12 @@ class IterationRenderer: NSObject, Renderer {
     }
     
     var seedData: Data = "Seed.data".data(using: .utf8)! {
-        didSet { canvasIsDirty = true }
+        didSet {
+            if seedData != oldValue {
+                canvasIsDirty = true
+                
+            }
+        }
     }
     
     private var canvasPipelineState: MTLRenderPipelineState

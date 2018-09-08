@@ -113,9 +113,9 @@
 		D186719F2141E5B4008FF5E4 /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
-				D18671A12141FE61008FF5E4 /* Renderer.swift */,
 				D18671A3214200CE008FF5E4 /* IterationRenderer.swift */,
 				D178BADA214341C8000BB0F0 /* IterationShaders.metal */,
+				D18671A12141FE61008FF5E4 /* Renderer.swift */,
 			);
 			path = Rendering;
 			sourceTree = "<group>";
