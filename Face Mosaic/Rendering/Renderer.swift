@@ -20,6 +20,8 @@ protocol Renderer: MTKViewDelegate {
     var maxRotation: Float { get set }
     var scale: Float { get set }
     
+    init(metalView: MTKView)
+    
     func addFace(url: URL)
     func removeFace(at index: Int)
 }

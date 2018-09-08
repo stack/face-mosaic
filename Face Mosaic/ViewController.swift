@@ -134,7 +134,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         // Prepare the renderer
         metalView.device = MTLCreateSystemDefaultDevice()
         
-        renderer = OriginalRenderer(metalView: metalView)
+        // renderer = OriginalRenderer(metalView: metalView)
+        renderer = IterationRenderer(metalView: metalView)
         renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
         metalView.delegate = renderer
         

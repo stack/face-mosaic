@@ -13,14 +13,14 @@
 		D12B5614213B4F72005B65D5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D12B5612213B4F72005B65D5 /* Main.storyboard */; };
 		D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */; };
 		D12B5621213B5564005B65D5 /* ImageCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */; };
-		D12B5627213C5180005B65D5 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D12B5626213C5180005B65D5 /* Shaders.metal */; };
-		D12B5629213CC626005B65D5 /* OriginalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5628213CC626005B65D5 /* OriginalRenderer.swift */; };
+		D178BADB214341C8000BB0F0 /* IterationShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D178BADA214341C8000BB0F0 /* IterationShaders.metal */; };
 		D1833F5D213F3B83003F6888 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5B213F3B83003F6888 /* MetalKit.framework */; };
 		D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5C213F3B83003F6888 /* Metal.framework */; };
 		D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5F213F3B8A003F6888 /* GameKit.framework */; };
 		D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */; };
 		D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */; };
 		D18671A22141FE61008FF5E4 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18671A12141FE61008FF5E4 /* Renderer.swift */; };
+		D18671A4214200CE008FF5E4 /* IterationRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18671A3214200CE008FF5E4 /* IterationRenderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,14 +33,14 @@
 		D12B5616213B4F72005B65D5 /* Face_Mosaic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Face_Mosaic.entitlements; sourceTree = "<group>"; };
 		D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewItem.swift; sourceTree = "<group>"; };
 		D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImageCollectionViewItem.xib; sourceTree = "<group>"; };
-		D12B5626213C5180005B65D5 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
-		D12B5628213CC626005B65D5 /* OriginalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalRenderer.swift; sourceTree = "<group>"; };
+		D178BADA214341C8000BB0F0 /* IterationShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = IterationShaders.metal; sourceTree = "<group>"; };
 		D1833F5B213F3B83003F6888 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		D1867198213F4ED6008FF5E4 /* float4x4+geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float4x4+geometry.swift"; sourceTree = "<group>"; };
 		D186719C2141DECF008FF5E4 /* ColorPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerButton.swift; sourceTree = "<group>"; };
 		D18671A12141FE61008FF5E4 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		D18671A3214200CE008FF5E4 /* IterationRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IterationRenderer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,9 +113,9 @@
 		D186719F2141E5B4008FF5E4 /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
-				D12B5628213CC626005B65D5 /* OriginalRenderer.swift */,
-				D12B5626213C5180005B65D5 /* Shaders.metal */,
 				D18671A12141FE61008FF5E4 /* Renderer.swift */,
+				D18671A3214200CE008FF5E4 /* IterationRenderer.swift */,
+				D178BADA214341C8000BB0F0 /* IterationShaders.metal */,
 			);
 			path = Rendering;
 			sourceTree = "<group>";
@@ -202,9 +202,9 @@
 				D18671A22141FE61008FF5E4 /* Renderer.swift in Sources */,
 				D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */,
 				D1867199213F4ED6008FF5E4 /* float4x4+geometry.swift in Sources */,
-				D12B5627213C5180005B65D5 /* Shaders.metal in Sources */,
 				D12B560F213B4F70005B65D5 /* ViewController.swift in Sources */,
-				D12B5629213CC626005B65D5 /* OriginalRenderer.swift in Sources */,
+				D178BADB214341C8000BB0F0 /* IterationShaders.metal in Sources */,
+				D18671A4214200CE008FF5E4 /* IterationRenderer.swift in Sources */,
 				D12B560D213B4F70005B65D5 /* AppDelegate.swift in Sources */,
 				D12B5620213B5564005B65D5 /* ImageCollectionViewItem.swift in Sources */,
 			);
