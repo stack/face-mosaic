@@ -350,6 +350,7 @@ class IterationRenderer: NSObject, Renderer {
             canvasTexture = metalDevice.makeTexture(descriptor: descriptor)!
             
             relayoutCanvasTexture = true
+            recalculateScale = true
             canvasIsDirty = true
             rebuildCanvasTexture = false
         }
