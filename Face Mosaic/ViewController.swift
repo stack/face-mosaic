@@ -100,16 +100,20 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         panel.beginSheetModal(for: window) { (response) in
             if response == .OK {
                 if let url = panel.url {
-                    self.imageURLs.append(url)
-                    
-                    let path = IndexPath(item: self.imageURLs.count - 1, section: ImagesMainSection)
-                    let items: Set<IndexPath> = [path]
-                    self.imageCollectionView.insertItems(at: items)
-                    
-                    self.renderer.addFace(url: url)
+                    self.addImage(from: url)
                 }
             }
         }
+    }
+    
+    func addImage(from url: URL) {
+        imageURLs.append(url)
+        
+        let path = IndexPath(item: imageURLs.count - 1, section: ImagesMainSection)
+        let items: Set<IndexPath> = [path]
+        imageCollectionView.insertItems(at: items)
+        
+        renderer.addFace(url: url)
     }
     
     @IBAction func export(_ sender: Any?) {

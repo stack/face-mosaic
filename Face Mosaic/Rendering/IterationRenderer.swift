@@ -216,6 +216,7 @@ class IterationRenderer: NSObject, Renderer {
     
     func removeFace(at index: Int) {
         faces.remove(at: index)
+        self.canvasIsDirty = true
     }
     
     // MARK: - Canvas Management

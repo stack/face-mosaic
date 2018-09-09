@@ -8,19 +8,56 @@
 
 import Cocoa
 
+fileprivate let MainStoryboardName = NSStoryboard.Name(rawValue: "Main")
+fileprivate let MainStoryboardControllerIdentifier = NSStoryboard.SceneIdentifier(rawValue: "Main")
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+    
+    // MARK: - Properties
+    
+    private var windowController: WindowController? = nil
+    
+    private var filesToOpen: [String] = []
 
-
-
+    // MARK: - Protocols
+    
+    // MARK: <NSApplicationDelegate>
+    
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        if let controller = windowController {
+            controller.open(file: filename)
+        } else {
+            filesToOpen.append(filename)
+        }
+        
+        return true
+    }
+    
+    func application(_ sender: NSApplication, openFiles filenames: [String]) {
+        if let controller = windowController {
+            for filename in filenames {
+                controller.open(file: filename)
+            }
+        } else {
+            filesToOpen.append(contentsOf: filenames)
+        }
+    }
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        guard let controller = NSApplication.shared.mainWindow?.windowController as? WindowController else {
+            print("Application launched without the main window controller")
+            return
+        }
+        
+        for file in filesToOpen {
+            controller.open(file: file)
+        }
+        
+        windowController = controller
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
     }
-
-
 }
 
