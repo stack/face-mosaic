@@ -8,9 +8,6 @@
 
 import Cocoa
 
-fileprivate let MainStoryboardName = NSStoryboard.Name(rawValue: "Main")
-fileprivate let MainStoryboardControllerIdentifier = NSStoryboard.SceneIdentifier(rawValue: "Main")
-
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     

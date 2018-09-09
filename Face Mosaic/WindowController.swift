@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class WindowController: NSWindowController {
+class WindowController: NSWindowController, NSWindowDelegate, WindowDelegate {
     
     func open(file path: String) {
         guard let viewController = contentViewController as? ViewController else {
@@ -16,6 +16,14 @@ class WindowController: NSWindowController {
         }
         
         let url = URL(fileURLWithPath: path)
+        viewController.addImage(from: url)
+    }
+    
+    func window(_ window: Window, receivedURL url: URL) {
+        guard let viewController = contentViewController as? ViewController else {
+            return
+        }
+        
         viewController.addImage(from: url)
     }
 }
