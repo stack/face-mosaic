@@ -79,7 +79,7 @@ vertex FaceVertexOut face_instance_vertex(const device FaceUniform& uniform[[ bu
     };
     
     FaceVertexOut vertexOut;
-    vertexOut.position = uniform.translation * uniform.scaling * uniform.rotation * vertices[vid];
+    vertexOut.position = uniform.translation * uniform.rotation * uniform.scaling * vertices[vid];
     vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
@@ -94,5 +94,5 @@ fragment float4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
                                      t_address::clamp_to_edge,
                                      r_address::clamp_to_edge);
     
-    return texture.sample(textureSampler, faceVertex.texturePosition).zyxw;
+    return texture.sample(textureSampler, faceVertex.texturePosition);
 }

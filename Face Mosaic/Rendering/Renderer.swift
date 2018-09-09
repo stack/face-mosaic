@@ -22,6 +22,7 @@ protocol Renderer: MTKViewDelegate {
     
     init(metalView: MTKView)
     
+    func addFace(data: [UInt8], width: Int, height: Int, completionHandler: @escaping () -> Void)
     func addFace(url: URL)
     func removeFace(at index: Int)
     

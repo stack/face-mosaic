@@ -13,23 +13,9 @@ fileprivate let selectedBackgroundColor = NSColor.alternateSelectedControlColor.
 
 class ImageCollectionViewItem: NSCollectionViewItem {
 
-    var path: String? {
+    var image: NSImage? {
         didSet {
-            if let value = path {
-                imageView?.image = NSImage(contentsOfFile: value)
-            } else {
-                imageView?.image = nil
-            }
-        }
-    }
-    
-    var url: URL? {
-        didSet {
-            if let value = url {
-                imageView?.image = NSImage(contentsOf: value)
-            } else {
-                imageView?.image = nil
-            }
+            imageView?.image = image
         }
     }
     

@@ -75,9 +75,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     @IBOutlet weak var metalView: MTKView!
     
-    var imageURLs: [URL] = []
+    var images: [NSImage] = []
     
     var renderer: Renderer!
+    
+    private var importQueue: DispatchQueue = DispatchQueue(label: "Import")
     
     private var exportPanel: NSSavePanel? = nil
     private var exportType: ExportType = .png
@@ -107,13 +109,51 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     func addImage(from url: URL) {
-        imageURLs.append(url)
+        toggleAvailability(enabled: false)
         
-        let path = IndexPath(item: imageURLs.count - 1, section: ImagesMainSection)
-        let items: Set<IndexPath> = [path]
-        imageCollectionView.insertItems(at: items)
-        
-        renderer.addFace(url: url)
+        importQueue.async {
+            // Load the image in to memory
+            let image = NSImage(contentsOf: url)!
+            
+            // Get the raw bytes of the image
+            let imageSource = CGImageSourceCreateWithData(image.tiffRepresentation! as CFData, nil)!
+            let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)!
+            
+            let width = cgImage.width
+            let height = cgImage.height
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            
+            var rawData = [UInt8](repeating: 0, count: width * height * 4)
+            
+            let bytesPerPixel = 4
+            let bytesPerRow = bytesPerPixel * width
+            let bitsPerComponent = 8;
+            
+            let context = CGContext.init(
+                data: &rawData,
+                width: width,
+                height: height,
+                bitsPerComponent: bitsPerComponent,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue,
+                releaseCallback: nil, releaseInfo: nil
+                )!
+            
+            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            
+            self.renderer.addFace(data: rawData, width: width, height: height) {
+                self.images.append(image)
+                
+                let path = IndexPath(item: self.images.count - 1, section: ImagesMainSection)
+                let items: Set<IndexPath> = [path]
+                
+                DispatchQueue.main.sync {
+                    self.imageCollectionView.insertItems(at: items)
+                    self.toggleAvailability(enabled: true)
+                }
+            }
+        }
     }
     
     @IBAction func export(_ sender: Any?) {
@@ -271,7 +311,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             .reversed()
         
         for index in sortedIndexes {
-            imageURLs.remove(at: index.item)
+            images.remove(at: index.item)
             renderer.removeFace(at: index.item)
         }
         
@@ -305,6 +345,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         // Prepare the renderer
         metalView.device = MTLCreateSystemDefaultDevice()
+        // metalView.colorPixelFormat = .bgra8Unorm_srgb
         
         // renderer = OriginalRenderer(metalView: metalView)
         renderer = IterationRenderer(metalView: metalView)
@@ -333,13 +374,13 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             return item
         }
         
-        imageItem.url = imageURLs[indexPath.item]
+        imageItem.image = images[indexPath.item]
         
         return imageItem
     }
     
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imageURLs.count
+        return images.count
     }
     
     // MARK: <NSCollectionViewDelegate>
