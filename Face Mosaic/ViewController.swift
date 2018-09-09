@@ -81,6 +81,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     private var exportPanel: NSSavePanel? = nil
     private var exportType: ExportType = .png
+    private var exportQueue: DispatchQueue = DispatchQueue(label: "Export")
     
     // MARK: - Actions
     
@@ -167,42 +168,59 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 return
             }
             
-            self.export(to: url, type: self.exportType)
+            self.toggleAvailability(enabled: false)
+            self.export(to: url, type: self.exportType) {
+                self.toggleAvailability(enabled: true)
+            }
         }
     }
     
-    private func export(to url: URL, type: ExportType) {
-        // Blit the data to memory
-        let imageBuffer = renderer.makeImageBuffer()
-        
-        // Convert data to a data provider
-        var rawData = [UInt8](repeating: 0, count: imageBuffer.length)
-        memcpy(&rawData, imageBuffer.contents(), imageBuffer.length)
-        
-        let dataProvider = CGDataProvider(dataInfo: nil, data: &rawData, size: rawData.count) { _,_,_ in }!
-        
-        // Generate the image from the data
-        let image = CGImage(
-            width: Int(renderer.canvasSize.width),
-            height: Int(renderer.canvasSize.height),
-            bitsPerComponent: 8,
-            bitsPerPixel: 32,
-            bytesPerRow: Int(renderer.canvasSize.width) * 4,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),  CGBitmapInfo.byteOrder32Little],
-            provider: dataProvider,
-            decode: nil,
-            shouldInterpolate: false,
-            intent: .defaultIntent
-        )!
-        
-        // Write the image to the filesystem
-        let destination = CGImageDestinationCreateWithURL(url as CFURL, type.fileExtension as CFString, 1, nil)!
-        CGImageDestinationAddImage(destination, image, nil)
-        
-        let result = CGImageDestinationFinalize(destination)
-        if !result {
-            print("Failed to finalize image destination")
+    private func export(to url: URL, type: ExportType, completionHandler: @escaping () -> Void) {
+        exportQueue.async {
+            let startDate = Date()
+            
+            // Blit the data to memory
+            let imageBuffer = self.renderer.makeImageBuffer()
+            
+            // Convert data to a data provider
+            var rawData = [UInt8](repeating: 0, count: imageBuffer.length)
+            memcpy(&rawData, imageBuffer.contents(), imageBuffer.length)
+            
+            let dataProvider = CGDataProvider(dataInfo: nil, data: &rawData, size: rawData.count) { _,_,_ in }!
+            
+            // Generate the image from the data
+            let image = CGImage(
+                width: Int(self.renderer.canvasSize.width),
+                height: Int(self.renderer.canvasSize.height),
+                bitsPerComponent: 8,
+                bitsPerPixel: 32,
+                bytesPerRow: Int(self.renderer.canvasSize.width) * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),  CGBitmapInfo.byteOrder32Little],
+                provider: dataProvider,
+                decode: nil,
+                shouldInterpolate: false,
+                intent: .defaultIntent
+            )!
+            
+            // Write the image to the filesystem
+            let destination = CGImageDestinationCreateWithURL(url as CFURL, type.fileExtension as CFString, 1, nil)!
+            CGImageDestinationAddImage(destination, image, nil)
+            
+            let result = CGImageDestinationFinalize(destination)
+            if !result {
+                print("Failed to finalize image destination")
+            }
+            
+            let endDate = Date()
+            
+            let duration = endDate.timeIntervalSinceReferenceDate - startDate.timeIntervalSinceReferenceDate
+            
+            print("Export took \(duration) seconds")
+            
+            DispatchQueue.main.sync {
+                completionHandler()
+            }
         }
     }
     
@@ -356,6 +374,25 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     // MARK: - Utilities
+    
+    private func toggleAvailability(enabled: Bool) {
+        addImageButton.isEnabled = enabled
+        
+        if enabled {
+            setRemoveButtonState()
+        } else {
+            removeImageButton.isEnabled = false
+        }
+        
+        maxRotationSlider.isEnabled = enabled
+        iterationsSlider.isEnabled = enabled
+        scaleSlider.isEnabled = enabled
+        backgroundColorButton.isEnabled = enabled
+        resolutionWidthTextField.isEnabled = enabled
+        resolutionHeightTextField.isEnabled = enabled
+        seedTextField.isEnabled = enabled
+        exportButton.isEnabled = enabled
+    }
     
     private func setRemoveButtonState() {
         if imageCollectionView.selectionIndexes.isEmpty {
