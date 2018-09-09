@@ -14,6 +14,34 @@ fileprivate let ImageCollectionViewItemIdentifier = NSUserInterfaceItemIdentifie
 
 fileprivate let ImagesMainSection = 0
 
+fileprivate enum ExportType: CustomStringConvertible {
+    case png
+    case tiff
+
+    // FIXME: For Swift 4.2, use CaseIterable instead
+    static var allCases: [ExportType] {
+        return [.png, .tiff]
+    }
+    
+    var fileExtension: String {
+        switch self {
+        case .png:
+            return kUTTypePNG as String
+        case .tiff:
+            return kUTTypeTIFF as String
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .png:
+            return NSLocalizedString("PNG", comment: "PNG Export Description")
+        case .tiff:
+            return NSLocalizedString("TIFF", comment: "TIFF Export Description")
+        }
+    }
+}
+
 class ViewController: NSViewController, NSCollectionViewDataSource, NSCollectionViewDelegate, NSTextFieldDelegate {
 
     // MARK: - Properties
@@ -40,7 +68,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     @IBOutlet weak var resolutionWidthTextField: NSTextField!
     @IBOutlet weak var resolutionHeightTextField: NSTextField!
     
+    @IBOutlet weak var seedLabel: NSTextField!
     @IBOutlet weak var seedTextField: NSTextField!
+    
+    @IBOutlet weak var exportButton: NSButton!
     
     @IBOutlet weak var metalView: MTKView!
     
@@ -48,6 +79,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     var renderer: Renderer!
     
+    private var exportPanel: NSSavePanel? = nil
+    private var exportType: ExportType = .png
     
     // MARK: - Actions
     
@@ -76,6 +109,121 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 }
             }
         }
+    }
+    
+    @IBAction func export(_ sender: Any?) {
+        // Ensure we have a window
+        guard let window = view.window else {
+            fatalError("No window for the view")
+        }
+        
+        // Build the file type selection menu
+        let label = NSTextField(labelWithString: NSLocalizedString("Format", comment: "Save Format Label"))
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        let popUpButton = NSPopUpButton(frame: .zero)
+        popUpButton.action = #selector(ViewController.exportChangedExtension(_:))
+        popUpButton.target = self
+        popUpButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        for type in ExportType.allCases {
+            popUpButton.addItem(withTitle: type.description)
+        }
+
+        popUpButton.selectItem(at: 0)
+        exportType = ExportType.allCases[0]
+        
+        let stackView = NSStackView(views: [label, popUpButton])
+        stackView.orientation = .horizontal
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let wrapperView = NSView(frame: .zero)
+        wrapperView.translatesAutoresizingMaskIntoConstraints = false
+        
+        wrapperView.addSubview(stackView)
+        
+        wrapperView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=8)-[stack]-(>=8)-|", options: [], metrics: nil, views: ["stack": stackView]))
+        wrapperView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(>=8)-[stack]-(>=8)-|", options: [], metrics: nil, views: ["stack": stackView]))
+        wrapperView.addConstraint(NSLayoutConstraint(item: stackView, attribute: .centerX, relatedBy: .equal, toItem: wrapperView, attribute: .centerX, multiplier: 1.0, constant: 0.0))
+        wrapperView.addConstraint(NSLayoutConstraint(item: stackView, attribute: .centerY, relatedBy: .equal, toItem: wrapperView, attribute: .centerY, multiplier: 1.0, constant: 0.0))
+        
+        // Build the panel
+        let panel = NSSavePanel()
+        panel.accessoryView = wrapperView
+        panel.allowedFileTypes = [exportType.fileExtension]
+        panel.canCreateDirectories = true
+        panel.canSelectHiddenExtension = true
+        panel.title = NSLocalizedString("Export Mosaic", comment: "Export Mosaic Save Dialog Title")
+        
+        exportPanel = panel
+        
+        // Run the panel
+        panel.beginSheetModal(for: window) { (result) in
+            guard result == .OK else {
+                return
+            }
+            
+            guard let url = panel.url else {
+                return
+            }
+            
+            self.export(to: url, type: self.exportType)
+        }
+    }
+    
+    private func export(to url: URL, type: ExportType) {
+        // Blit the data to memory
+        let imageBuffer = renderer.makeImageBuffer()
+        
+        // Convert data to a data provider
+        var rawData = [UInt8](repeating: 0, count: imageBuffer.length)
+        memcpy(&rawData, imageBuffer.contents(), imageBuffer.length)
+        
+        let dataProvider = CGDataProvider(dataInfo: nil, data: &rawData, size: rawData.count) { _,_,_ in }!
+        
+        // Generate the image from the data
+        let image = CGImage(
+            width: Int(renderer.canvasSize.width),
+            height: Int(renderer.canvasSize.height),
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: Int(renderer.canvasSize.width) * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),  CGBitmapInfo.byteOrder32Little],
+            provider: dataProvider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+        )!
+        
+        // Write the image to the filesystem
+        let destination = CGImageDestinationCreateWithURL(url as CFURL, type.fileExtension as CFString, 1, nil)!
+        CGImageDestinationAddImage(destination, image, nil)
+        
+        let result = CGImageDestinationFinalize(destination)
+        if !result {
+            print("Failed to finalize image destination")
+        }
+    }
+    
+    @IBAction func exportChangedExtension(_ sender: Any?) {
+        guard let popUpButton = sender as? NSPopUpButton else {
+            return
+        }
+        
+        guard popUpButton.indexOfSelectedItem >= 0 else {
+            return
+        }
+        
+        // Save the extension
+        exportType = ExportType.allCases[popUpButton.indexOfSelectedItem]
+        
+        // Apply the extension to the save panel
+        guard let panel = exportPanel else {
+            return
+        }
+        
+        panel.allowedFileTypes = [exportType.fileExtension]
     }
 
     @IBAction func interationsChanged(_ sender: Any?) {

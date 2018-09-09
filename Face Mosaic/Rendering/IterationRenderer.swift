@@ -397,4 +397,41 @@ class IterationRenderer: NSObject, Renderer {
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         encoder.endEncoding()
     }
+    
+    // MARK: - Export Functions
+    
+    func makeImageBuffer() -> MTLBuffer {
+        let imagesBytesPerRow = Int(canvasSize.width) * 4
+        let imageByteCount = imagesBytesPerRow * Int(canvasSize.height)
+        let imageBuffer = metalDevice.makeBuffer(length: imageByteCount, options: [])!
+        
+        let commandQueue = metalDevice.makeCommandQueue()!
+        let commandBuffer = commandQueue.makeCommandBuffer()!
+        let encoder = commandBuffer.makeBlitCommandEncoder()!
+        
+        encoder.copy(
+            from: canvasTexture,
+            sourceSlice: 0,
+            sourceLevel: 0,
+            sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+            sourceSize: MTLSize(width: Int(canvasSize.width), height: Int(canvasSize.height), depth: 1),
+            to: imageBuffer,
+            destinationOffset: 0,
+            destinationBytesPerRow: imagesBytesPerRow,
+            destinationBytesPerImage: 0
+        )
+        encoder.endEncoding()
+        
+        /*
+        encoder.synchronize(texture: canvasTexture, slice: 0, level: 0)
+        encoder.endEncoding()
+        */
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+        
+        
+        
+        return imageBuffer
+    }
 }

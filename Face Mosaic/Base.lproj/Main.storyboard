@@ -685,7 +685,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="Face Mosaic" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -991,13 +991,27 @@
                                                             <real value="3.4028234663852886e+38"/>
                                                         </customSpacing>
                                                     </stackView>
+                                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j8L-e1-qgO">
+                                                        <rect key="frame" x="60" y="13" width="80" height="32"/>
+                                                        <buttonCell key="cell" type="push" title="Export" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="g0T-sw-PLQ">
+                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <action selector="export:" target="XfG-lQ-9wD" id="7Jr-bP-5NE"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="200" id="2st-v9-wPi"/>
+                                                    <constraint firstItem="j8L-e1-qgO" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="h8k-ie-NuH" secondAttribute="leading" constant="8" id="62d-ke-qtd"/>
+                                                    <constraint firstItem="j8L-e1-qgO" firstAttribute="top" relation="greaterThanOrEqual" secondItem="hdv-sZ-orc" secondAttribute="bottom" constant="8" id="7s4-tN-hCY"/>
+                                                    <constraint firstItem="j8L-e1-qgO" firstAttribute="centerX" secondItem="h8k-ie-NuH" secondAttribute="centerX" id="Bzw-a1-Ulf"/>
+                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="j8L-e1-qgO" secondAttribute="trailing" constant="8" id="I9G-UP-6AE"/>
                                                     <constraint firstAttribute="trailing" secondItem="hdv-sZ-orc" secondAttribute="trailing" constant="20" id="Jue-sY-N25"/>
+                                                    <constraint firstAttribute="bottom" secondItem="j8L-e1-qgO" secondAttribute="bottom" constant="20" id="MUc-4a-00x"/>
                                                     <constraint firstItem="hdv-sZ-orc" firstAttribute="leading" secondItem="h8k-ie-NuH" secondAttribute="leading" constant="20" id="aj7-xs-2D2"/>
                                                     <constraint firstItem="hdv-sZ-orc" firstAttribute="top" secondItem="h8k-ie-NuH" secondAttribute="top" constant="20" id="e6v-tz-A27"/>
-                                                    <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="hdv-sZ-orc" secondAttribute="bottom" constant="20" id="zFR-Rk-mVS"/>
                                                 </constraints>
                                             </customView>
                                         </subviews>
@@ -1029,6 +1043,7 @@
                         <outlet property="addImageButton" destination="JRy-AE-BbC" id="FL8-qk-iJn"/>
                         <outlet property="backgroundColorButton" destination="NYg-mJ-WfD" id="3X3-rB-eTf"/>
                         <outlet property="backgroundColorLabel" destination="6vP-7r-pYe" id="OpG-Kg-Ch2"/>
+                        <outlet property="exportButton" destination="j8L-e1-qgO" id="KWC-ZV-aRN"/>
                         <outlet property="imageCollectionView" destination="yp0-0B-d5K" id="aBs-0A-iYW"/>
                         <outlet property="iterationsLabel" destination="XPq-m8-nUG" id="kxd-cH-fJf"/>
                         <outlet property="iterationsSlider" destination="MQq-4f-oW2" id="Ine-hI-mcf"/>
@@ -1041,6 +1056,7 @@
                         <outlet property="resolutionWidthTextField" destination="oB6-2E-G7c" id="yup-iD-xeU"/>
                         <outlet property="scaleLabel" destination="jWz-66-Ma2" id="yAE-CD-tGg"/>
                         <outlet property="scaleSlider" destination="o4D-jT-jud" id="cVd-21-lO4"/>
+                        <outlet property="seedLabel" destination="p3u-Gg-WKn" id="LYS-yQ-zBX"/>
                         <outlet property="seedTextField" destination="1d4-hS-Iok" id="e4r-pa-90N"/>
                     </connections>
                 </viewController>

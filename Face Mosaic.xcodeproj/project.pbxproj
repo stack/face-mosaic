@@ -34,6 +34,7 @@
 		D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewItem.swift; sourceTree = "<group>"; };
 		D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImageCollectionViewItem.xib; sourceTree = "<group>"; };
 		D178BADA214341C8000BB0F0 /* IterationShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = IterationShaders.metal; sourceTree = "<group>"; };
+		D178BADC21455AB7000BB0F0 /* Face Mosaic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Face Mosaic.entitlements"; sourceTree = "<group>"; };
 		D1833F5B213F3B83003F6888 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
@@ -77,6 +78,7 @@
 		D12B560B213B4F70005B65D5 /* Face Mosaic */ = {
 			isa = PBXGroup;
 			children = (
+				D178BADC21455AB7000BB0F0 /* Face Mosaic.entitlements */,
 				D12B5610213B4F72005B65D5 /* Assets.xcassets */,
 				D18671A02141E5CA008FF5E4 /* Extensions */,
 				D186719F2141E5B4008FF5E4 /* Rendering */,
@@ -160,6 +162,11 @@
 				TargetAttributes = {
 					D12B5608213B4F70005B65D5 = {
 						CreatedOnToolsVersion = 9.4.1;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -341,7 +348,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "Face Mosaic/Face_Mosaic.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Face Mosaic/Face Mosaic.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = GE3GZ86XX9;
@@ -360,7 +367,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "Face Mosaic/Face_Mosaic.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Face Mosaic/Face Mosaic.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = GE3GZ86XX9;

@@ -24,4 +24,6 @@ protocol Renderer: MTKViewDelegate {
     
     func addFace(url: URL)
     func removeFace(at index: Int)
+    
+    func makeImageBuffer() -> MTLBuffer
 }
