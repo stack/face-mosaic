@@ -714,7 +714,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="999" height="495"/>
                                 <subviews>
                                     <customView id="IHu-TU-jsD">
-                                        <rect key="frame" x="0.0" y="0.0" width="268" height="495"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="96" height="495"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
                                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="egk-8P-uqZ">
@@ -803,7 +803,7 @@
                                         </constraints>
                                     </customView>
                                     <customView id="Hzg-Be-D0m">
-                                        <rect key="frame" x="269" y="0.0" width="730" height="495"/>
+                                        <rect key="frame" x="97" y="0.0" width="902" height="495"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
                                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="xbA-lW-K6q" customClass="MTKView">
