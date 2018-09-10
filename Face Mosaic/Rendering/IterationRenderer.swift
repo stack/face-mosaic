@@ -30,7 +30,7 @@ class IterationRenderer: NSObject, Renderer {
         
         var pipelineState: MTLRenderPipelineState? = nil
         var texture: MTLTexture? = nil
-        var scalingMatrix: float4x4? = nil
+        var vertexBuffer: MTLBuffer? = nil
         
         init() {
             uuid = UUID()
@@ -41,10 +41,13 @@ class IterationRenderer: NSObject, Renderer {
         }
     }
     
+    private struct FaceVertex {
+        let position: float2
+    }
+    
     private struct FaceUniform {
         let translationMatrix: float4x4
         let rotationMatrix: float4x4
-        let scalingMatrix: float4x4
     }
     
     private struct CanvasVertex {
@@ -61,6 +64,7 @@ class IterationRenderer: NSObject, Renderer {
     private let textureLoader: MTKTextureLoader
     
     private var faces: [Face] = []
+    private var facesUniformBuffer: MTLBuffer
     
     var backgroundColor: NSColor = .black {
         didSet { canvasIsDirty = true }
@@ -82,7 +86,6 @@ class IterationRenderer: NSObject, Renderer {
         didSet {
             if maxRotation != oldValue {
                 canvasIsDirty = true
-                
             }
         }
     }
@@ -104,7 +107,6 @@ class IterationRenderer: NSObject, Renderer {
         didSet {
             if seedData != oldValue {
                 canvasIsDirty = true
-                
             }
         }
     }
@@ -113,10 +115,10 @@ class IterationRenderer: NSObject, Renderer {
     private var canvasTexture: MTLTexture
     private var canvasVertexBuffer: MTLBuffer
     
+    private var canvasIsDirty: Bool = true
     private var rebuildCanvasTexture: Bool = true
     private var recalculateScale: Bool = true
     private var relayoutCanvasTexture: Bool = true
-    private var canvasIsDirty: Bool = true
     
     private let importQueue = DispatchQueue(label: "Renderer Import")
     
@@ -158,6 +160,9 @@ class IterationRenderer: NSObject, Renderer {
         canvasTexture = metalDevice.makeTexture(descriptor: canvasDescriptor)!
         
         canvasVertexBuffer = metalDevice.makeBuffer(length: MemoryLayout<CanvasVertex>.size * 4, options: [])!
+        
+        // Build a dummy buffer as a place holder for the face uniform buffer
+        facesUniformBuffer = metalDevice.makeBuffer(length: 1, options: [])!
     }
     
     
@@ -188,13 +193,23 @@ class IterationRenderer: NSObject, Renderer {
             pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
             pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
             pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+            
+            var vertices: [FaceVertex] = [
+                FaceVertex(position: float2(-1.0,  1.0)),
+                FaceVertex(position: float2( 1.0,  1.0)),
+                FaceVertex(position: float2(-1.0, -1.0)),
+                FaceVertex(position: float2( 1.0, -1.0))
+            ]
         
             face.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
             face.texture = texture
+            face.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
+            
             face.state = .ready
         
             self.faces.append(face)
         
+            self.recalculateScale = true
             self.canvasIsDirty = true
             
             completionHandler()
@@ -244,18 +259,26 @@ class IterationRenderer: NSObject, Renderer {
                 pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
                 pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
                 
+                var vertices: [FaceVertex] = [
+                    FaceVertex(position: float2(-1.0,  1.0)),
+                    FaceVertex(position: float2( 1.0,  1.0)),
+                    FaceVertex(position: float2(-1.0, -1.0)),
+                    FaceVertex(position: float2( 1.0, -1.0))
+                ]
+                
                 updatedFace.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
-                
                 updatedFace.texture = newTexture
+                updatedFace.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
+                
                 updatedFace.state = .ready
-                
-                
             } else {
                 print("Texture loader returned neither a texture not an error")
                 updatedFace.state = .error
             }
             
             self.faces[index] = updatedFace
+            
+            self.recalculateScale = true
             self.canvasIsDirty = true
         }
     }
@@ -299,49 +322,37 @@ class IterationRenderer: NSObject, Renderer {
         ]
     }
     
-    private func calculateMissingScalingMatrices(force: Bool = false) {
+    private func calculateScalingMatrices() {
         for (idx, face) in faces.enumerated() {
-            if (!force && face.scalingMatrix != nil) || face.state != .ready {
+            if face.state != .ready {
                 continue
             }
             
-            var newFace = face
-            let texture = face.texture!
+            let newFace = face
+            let texture = newFace.texture!
             
             let sceneSize = float2(Float(canvasSize.width), Float(canvasSize.height))
             let textureSize = float2(Float(texture.width), Float(texture.height))
             let availableSize = sceneSize * scale
+            
             let delta = availableSize / textureSize
             let factor = delta.min()!
-            let scaledSize = textureSize * factor
-            let normalizedSize = (scaledSize / sceneSize)
             
-            newFace.scalingMatrix = float4x4(scaledBy: float3(normalizedSize[0], normalizedSize[1], 1.0))
+            let scaledSize = textureSize * factor
+            let normalizedOffset = (scaledSize / sceneSize)
+            
+            var vertices: [FaceVertex] = [
+                FaceVertex(position: float2(normalizedOffset[0] * -1.0, normalizedOffset[1])),
+                FaceVertex(position: float2(normalizedOffset[0],        normalizedOffset[1])),
+                FaceVertex(position: float2(normalizedOffset[0] * -1.0, normalizedOffset[1] * -1.0)),
+                FaceVertex(position: float2(normalizedOffset[0],        normalizedOffset[1] * -1.0)),
+            ]
+            
+            let buffer = newFace.vertexBuffer!
+            memcpy(buffer.contents(), &vertices, MemoryLayout<FaceVertex>.size * vertices.count)
+            
             faces[idx] = newFace
         }
-    }
-    
-    private func renderFaceToCanvas(encoder: MTLRenderCommandEncoder, rng: GKRandomSource, face: Face) {
-        let translateX = rng.nextUniform() * 2.0 - 1.0
-        let translateY = rng.nextUniform() * 2.0 - 1.0
-        let translationMatrix = float4x4(translationBy: float3(translateX, translateY, 0))
-        
-        let rotation = rng.nextUniform() * maxRotation
-        let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
-        let rotationMatrix = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: Float.pi * 2.0 * (rotation * rotationMultiplier))
-        
-        let scalingMatrix = face.scalingMatrix!
-        
-        var uniform = FaceUniform(
-            translationMatrix: translationMatrix,
-            rotationMatrix: rotationMatrix,
-            scalingMatrix: scalingMatrix
-        )
-        
-        encoder.setRenderPipelineState(face.pipelineState!)
-        encoder.setVertexBytes(&uniform, length: MemoryLayout<FaceUniform>.size, index: 0)
-        encoder.setFragmentTexture(face.texture!, index: 0)
-        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
     }
     
     private func renderFacesToCanvas(commandBuffer: MTLCommandBuffer) {
@@ -363,19 +374,60 @@ class IterationRenderer: NSObject, Renderer {
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
         
         // Fill in any missing scaling matrices
-        calculateMissingScalingMatrices(force: recalculateScale)
-        recalculateScale = false
+        if recalculateScale {
+            calculateScalingMatrices()
+            recalculateScale = false
+        }
         
         // Build a reproducable random number generate for our calculations
         let rng = GKARC4RandomSource(seed: seedData)
         
-        for _ in 0 ..< iterations {
-            for face in faces {
-                guard face.state == .ready else {
-                    continue
+        // Build all of the uniforms for each iteration of each face
+        if faces.count > 0 && iterations > 0 {
+            let memorySize = MemoryLayout<FaceUniform>.size
+            let bufferSize = memorySize * Int(iterations) * faces.count
+            
+            if facesUniformBuffer.length != bufferSize {
+                facesUniformBuffer = metalDevice.makeBuffer(length: bufferSize, options: [])!
+            }
+            
+            var contents = facesUniformBuffer.contents()
+            
+            for _ in 0 ..< iterations {
+                for _ in faces {
+                    let translateX = rng.nextUniform() * 2.0 - 1.0
+                    let translateY = rng.nextUniform() * 2.0 - 1.0
+                    let translationMatrix = float4x4(translationBy: float3(translateX, translateY, 0))
+                    
+                    let rotation = rng.nextUniform() * maxRotation
+                    let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
+                    let rotationMatrix = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: Float.pi * 2.0 * (rotation * rotationMultiplier))
+                    
+                    var uniform = FaceUniform(
+                        translationMatrix: translationMatrix,
+                        rotationMatrix: rotationMatrix
+                    )
+                    
+                    memcpy(contents, &uniform, memorySize)
+                    contents += memorySize
                 }
-                
-                renderFaceToCanvas(encoder: encoder, rng: rng, face: face)
+            }
+            
+            // Render each face
+            for iteration in 0 ..< Int(iterations) {
+                for (idx, face) in faces.enumerated() {
+                    guard face.state == .ready else {
+                        continue
+                    }
+                    
+                    let offset = iteration * faces.count + idx
+                    
+                    encoder.setRenderPipelineState(face.pipelineState!)
+                    encoder.setVertexBuffer(face.vertexBuffer!, offset: 0, index: 0)
+                    encoder.setVertexBuffer(facesUniformBuffer, offset: memorySize * offset, index: 1)
+                    encoder.setFragmentTexture(face.texture!, index: 0)
+                    encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+                }
             }
         }
     
@@ -470,15 +522,8 @@ class IterationRenderer: NSObject, Renderer {
         )
         encoder.endEncoding()
         
-        /*
-        encoder.synchronize(texture: canvasTexture, slice: 0, level: 0)
-        encoder.endEncoding()
-        */
-        
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
-        
-        
         
         return imageBuffer
     }

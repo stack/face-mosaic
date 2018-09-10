@@ -49,6 +49,10 @@ fragment float4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
     return texture.sample(textureSampler, canvasVertex.texturePosition);
 }
 
+struct FaceVertexIn {
+    packed_float2 position;
+};
+
 struct FaceVertexOut {
     float4 position [[position]];
     float2 texturePosition;
@@ -57,19 +61,13 @@ struct FaceVertexOut {
 struct FaceUniform {
     float4x4 translation;
     float4x4 rotation;
-    float4x4 scaling;
 };
 
-vertex FaceVertexOut face_instance_vertex(const device FaceUniform& uniform[[ buffer(0) ]],
+vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[ buffer(0) ]],
+                                          const device FaceUniform& uniform [[ buffer(1) ]],
                                           ushort vid [[ vertex_id ]],
                                           ushort iid [[ instance_id ]])
 {
-    constexpr float4 vertices[4] = {
-        float4(-1.0,  1.0, 0.0, 1.0),
-        float4( 1.0,  1.0, 0.0, 1.0),
-        float4(-1.0, -1.0, 0.0, 1.0),
-        float4( 1.0, -1.0, 0.0, 1.0),
-    };
     
     constexpr float2 texturePositions[4] = {
         float2(0.0, 0.0),
@@ -78,8 +76,10 @@ vertex FaceVertexOut face_instance_vertex(const device FaceUniform& uniform[[ bu
         float2(1.0, 1.0)
     };
     
+    FaceVertexIn vertexIn = vertices[vid];
+    
     FaceVertexOut vertexOut;
-    vertexOut.position = uniform.translation * uniform.rotation * uniform.scaling * vertices[vid];
+    vertexOut.position = uniform.translation * uniform.rotation * float4(vertexIn.position, 0.0, 1.0);
     vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
