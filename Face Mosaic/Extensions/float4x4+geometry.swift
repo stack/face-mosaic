@@ -27,6 +27,16 @@ extension float4x4 {
                   float4(0,    0,    0,    1))
     }
     
+    init(zRotation angleRadians: Float) {
+        let s = sinf(angleRadians)
+        let c = cosf(angleRadians)
+        
+        self.init(float4(c,   s * -1.0, 0.0, 0.0),
+                  float4(s,   c,        0.0, 0.0),
+                  float4(0.0, 0.0,      1.0, 0.0),
+                  float4(0.0, 0.0,      0.0, 1.0))
+    }
+    
     init(rotationAbout axis: float3, by angleRadians: Float) {
         let x = axis.x, y = axis.y, z = axis.z
         let c = cosf(angleRadians)

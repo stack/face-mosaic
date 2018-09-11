@@ -37,7 +37,7 @@ vertex CanvasVertexOut canvas_vertex(const device CanvasVertexIn* vertices [[ bu
     return vertexOut;
 }
 
-fragment float4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
+fragment half4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
                                 texture2d<float, access::sample> texture [[texture(0)]])
 {
     constexpr sampler textureSampler(mag_filter::linear,
@@ -46,7 +46,7 @@ fragment float4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
                                      t_address::clamp_to_edge,
                                      r_address::clamp_to_edge);
     
-    return texture.sample(textureSampler, canvasVertex.texturePosition);
+    return (half4)texture.sample(textureSampler, canvasVertex.texturePosition);
 }
 
 struct FaceVertexIn {
@@ -61,6 +61,7 @@ struct FaceVertexOut {
 struct FaceUniform {
     float4x4 translation;
     float4x4 rotation;
+    float4x4 projection;
 };
 
 vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[ buffer(0) ]],
@@ -79,13 +80,14 @@ vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[
     FaceVertexIn vertexIn = vertices[vid];
     
     FaceVertexOut vertexOut;
+    // vertexOut.position = uniform.projection * uniform.rotation * float4(vertexIn.position, 0.0, 1.0);
     vertexOut.position = uniform.translation * uniform.rotation * float4(vertexIn.position, 0.0, 1.0);
     vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
 }
 
-fragment float4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
+fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
                                        texture2d<float, access::sample> texture [[ texture(0) ]])
 {
     constexpr sampler textureSampler(mag_filter::linear,
@@ -94,5 +96,5 @@ fragment float4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
                                      t_address::clamp_to_edge,
                                      r_address::clamp_to_edge);
     
-    return texture.sample(textureSampler, faceVertex.texturePosition);
+    return (half4)texture.sample(textureSampler, faceVertex.texturePosition);
 }

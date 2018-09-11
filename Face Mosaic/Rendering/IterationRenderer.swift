@@ -48,6 +48,7 @@ class IterationRenderer: NSObject, Renderer {
     private struct FaceUniform {
         let translationMatrix: float4x4
         let rotationMatrix: float4x4
+        let projectionMatrix: float4x4
     }
     
     private struct CanvasVertex {
@@ -176,9 +177,19 @@ class IterationRenderer: NSObject, Renderer {
         
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: true)
             let texture = self.metalDevice.makeTexture(descriptor: descriptor)!
+            texture.label = "Face \(face.uuid)"
         
             let region = MTLRegionMake2D(0, 0, width, height)
             texture.replace(region: region, mipmapLevel: 0, withBytes: data, bytesPerRow: width * 4)
+            
+            let commandBuffer = self.commandQueue.makeCommandBuffer()!
+            
+            let blitCommandEncoder = commandBuffer.makeBlitCommandEncoder()!
+            blitCommandEncoder.generateMipmaps(for: texture)
+            blitCommandEncoder.endEncoding()
+            
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
         
             // Build the resources for rendering faces to the canvas
             let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -228,6 +239,7 @@ class IterationRenderer: NSObject, Renderer {
             .generateMipmaps : true,
             .SRGB: true
         ]
+        
         textureLoader.newTexture(URL: url, options: options) { (texture, error) in
             // Find the matching face
             guard let index = self.faces.index(of: face) else {
@@ -244,6 +256,8 @@ class IterationRenderer: NSObject, Renderer {
             } else if let newTexture = texture {
                 print("Texture loaded for \(updatedFace.uuid)")
                 print("Texture: \(newTexture)")
+                
+                newTexture.label = "Face \(updatedFace.uuid)"
                 
                 // Build the resources for rendering faces to the canvas
                 let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -393,6 +407,15 @@ class IterationRenderer: NSObject, Renderer {
             
             var contents = facesUniformBuffer.contents()
             
+            let aspectRatio = Float(canvasSize.width / canvasSize.height)
+            
+            let projectionMatrix = float4x4(
+                float4(1.0 / aspectRatio, 0.0, 0.0, 0.0),
+                float4(0.0, 1.0, 0.0, 0.0),
+                float4(0.0, 0.0, 1.0, 0.0),
+                float4(0.0, 0.0, 0.0, 1.0)
+            )
+            
             for _ in 0 ..< iterations {
                 for _ in faces {
                     let translateX = rng.nextUniform() * 2.0 - 1.0
@@ -401,11 +424,12 @@ class IterationRenderer: NSObject, Renderer {
                     
                     let rotation = rng.nextUniform() * maxRotation
                     let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
-                    let rotationMatrix = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: Float.pi * 2.0 * (rotation * rotationMultiplier))
+                    let rotationMatrix = float4x4(zRotation: Float.pi * 2.0 * (rotation * rotationMultiplier))
                     
                     var uniform = FaceUniform(
                         translationMatrix: translationMatrix,
-                        rotationMatrix: rotationMatrix
+                        rotationMatrix: rotationMatrix,
+                        projectionMatrix: projectionMatrix
                     )
                     
                     memcpy(contents, &uniform, memorySize)
@@ -451,6 +475,7 @@ class IterationRenderer: NSObject, Renderer {
             relayoutCanvasTexture = true
             recalculateScale = true
             canvasIsDirty = true
+            
             rebuildCanvasTexture = false
         }
         

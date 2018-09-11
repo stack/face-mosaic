@@ -350,7 +350,9 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         // renderer = OriginalRenderer(metalView: metalView)
         renderer = IterationRenderer(metalView: metalView)
         renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
+        
         metalView.delegate = renderer
+        metalView.framebufferOnly = true
         
         // Listen for color changes from the background color picker
         NotificationCenter.default.addObserver(forName: NSColorPanel.colorDidChangeNotification, object: backgroundColorPanel, queue: nil) { (notification) in
