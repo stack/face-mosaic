@@ -109,51 +109,15 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     func addImage(from url: URL) {
-        toggleAvailability(enabled: false)
+        let image = NSImage(contentsOf: url)!
+        images.append(image)
         
-        importQueue.async {
-            // Load the image in to memory
-            let image = NSImage(contentsOf: url)!
-            
-            // Get the raw bytes of the image
-            let imageSource = CGImageSourceCreateWithData(image.tiffRepresentation! as CFData, nil)!
-            let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)!
-            
-            let width = cgImage.width
-            let height = cgImage.height
-            let colorSpace = CGColorSpaceCreateDeviceRGB()
-            
-            var rawData = [UInt8](repeating: 0, count: width * height * 4)
-            
-            let bytesPerPixel = 4
-            let bytesPerRow = bytesPerPixel * width
-            let bitsPerComponent = 8;
-            
-            let context = CGContext.init(
-                data: &rawData,
-                width: width,
-                height: height,
-                bitsPerComponent: bitsPerComponent,
-                bytesPerRow: bytesPerRow,
-                space: colorSpace,
-                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue,
-                releaseCallback: nil, releaseInfo: nil
-                )!
-            
-            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-            
-            self.renderer.addFace(data: rawData, width: width, height: height) {
-                self.images.append(image)
-                
-                let path = IndexPath(item: self.images.count - 1, section: ImagesMainSection)
-                let items: Set<IndexPath> = [path]
-                
-                DispatchQueue.main.sync {
-                    self.imageCollectionView.insertItems(at: items)
-                    self.toggleAvailability(enabled: true)
-                }
-            }
-        }
+        let path = IndexPath(item: self.images.count - 1, section: ImagesMainSection)
+        let items: Set<IndexPath> = [path]
+        
+        imageCollectionView.insertItems(at: items)
+        
+        renderer.addFace(url: url)
     }
     
     @IBAction func export(_ sender: Any?) {

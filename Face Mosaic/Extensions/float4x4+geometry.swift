@@ -9,68 +9,66 @@
 import simd
 
 extension float4x4 {
-    static func initIdentity() -> float4x4 {
+    
+    static func identity() -> float4x4 {
         return float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
     }
     
-    init(scaleBy s: Float) {
-        self.init(float4(s, 0, 0, 0),
-                  float4(0, s, 0, 0),
-                  float4(0, 0, s, 0),
-                  float4(0, 0, 0, 1))
-    }
-    
-    init(scaledBy s: float3) {
-        self.init(float4(s[0], 0,    0,    0),
-                  float4(0,    s[1], 0,    0),
-                  float4(0,    0,    s[2], 0),
-                  float4(0,    0,    0,    1))
-    }
-    
-    init(zRotation angleRadians: Float) {
-        let s = sinf(angleRadians)
-        let c = cosf(angleRadians)
+    static func orthographic(left: Float, right: Float, bottom: Float, top: Float, near: Float, far: Float) -> float4x4 {
+        let length = 1.0 / (right - left)
+        let height = 1.0 / (top - bottom)
+        let depth = 1.0 / (far - near)
         
-        self.init(float4(c,   s * -1.0, 0.0, 0.0),
-                  float4(s,   c,        0.0, 0.0),
-                  float4(0.0, 0.0,      1.0, 0.0),
-                  float4(0.0, 0.0,      0.0, 1.0))
-    }
-    
-    init(rotationAbout axis: float3, by angleRadians: Float) {
-        let x = axis.x, y = axis.y, z = axis.z
-        let c = cosf(angleRadians)
-        let s = sinf(angleRadians)
-        let t = 1 - c
-        self.init(float4( t * x * x + c,     t * x * y + z * s, t * x * z - y * s, 0),
-                  float4( t * x * y - z * s, t * y * y + c,     t * y * z + x * s, 0),
-                  float4( t * x * z + y * s, t * y * z - x * s,     t * z * z + c, 0),
-                  float4(                 0,                 0,                 0, 1))
-    }
-    
-    init(translationBy t: float3) {
-        self.init(float4(   1,    0,    0, 0),
-                  float4(   0,    1,    0, 0),
-                  float4(   0,    0,    1, 0),
-                  float4(t[0], t[1], t[2], 1))
-    }
-    
-    init(perspectiveProjectionFov fovRadians: Float, aspectRatio aspect: Float, nearZ: Float, farZ: Float) {
-        let yScale = 1 / tan(fovRadians * 0.5)
-        let xScale = yScale / aspect
-        let zRange = farZ - nearZ
-        let zScale = -(farZ + nearZ) / zRange
-        let wzScale = -2 * farZ * nearZ / zRange
+        let p = float4(2.0 * length, 0.0,          0.0,                 0.0)
+        let q = float4(0.0,          2.0 * height, 0.0,                 0.0)
+        let r = float4(0.0,          0.0,          depth,               0.0)
+        let s = float4(0.0,          0.0,          -1.0 * near * depth, 1.0)
         
-        let xx = xScale
-        let yy = yScale
-        let zz = zScale
-        let zw = Float(-1)
-        let wz = wzScale
+        return float4x4(p, q, r, s)
+    }
+    
+    static func scale(by x: Float, y: Float, z: Float) -> float4x4 {
+        let p = float4(x, 0.0, 0.0,   0.0)
+        let q = float4(0.0, y, 0.0,   0.0)
+        let r = float4(0.0, 0.0, z,   0.0)
+        let s = float4(0.0, 0.0, 0.0, 1.0)
         
-        self.init(float4(xx,  0,  0,  0),
-                  float4( 0, yy,  0,  0),
-                  float4( 0,  0, zz, zw),
-                  float4( 0,  0, wz,  1))
+        return float4x4(p, q, r, s)
+    }
+    
+    func scaled(by x: Float, y: Float, z: Float) -> float4x4 {
+        let m = float4x4.scale(by: x, y: y, z: z)
+        return m * self
+    }
+    
+    static func translate(by x: Float, y: Float, z: Float) -> float4x4 {
+        let p = float4(1.0, 0.0, 0.0, x)
+        let q = float4(0.0, 1.0, 0.0, y)
+        let r = float4(0.0, 0.0, 1.0, z)
+        let s = float4(0.0, 0.0, 0.0, 1.0)
+        
+        return float4x4(p, q, r, s)
+    }
+    
+    func translated(by x: Float, y: Float, z: Float) -> float4x4 {
+        let m = float4x4.translate(by: x, y: y, z: z)
+        return m * self
+    }
+    
+    func zRotated(by radians: Float) -> float4x4 {
+        let m = float4x4.zRotation(by: radians)
+        return m * self
+    }
+    
+    static func zRotation(by radians: Float) -> float4x4 {
+        let sine = sinf(radians)
+        let cosine = cosf(radians)
+        
+        let p = float4(cosine, sine * -1.0, 0.0, 0.0)
+        let q = float4(sine,   cosine,      0.0, 0.0)
+        let r = float4(0.0,    0.0,         1.0, 0.0)
+        let s = float4(0.0,    0.0,         0.0, 1.0)
+        
+        return float4x4(p, q, r, s)
     }
 }

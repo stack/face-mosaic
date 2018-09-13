@@ -25,8 +25,8 @@ class IterationRenderer: NSObject, Renderer {
         
         var state: Face.State = .new
         
-        var width: Float = 0.0
-        var height: Float = 0.0
+        var imageSize: float2 = float2(0.0, 0.0)
+        var textureSize: float2 = float2(0.0, 0.0)
         
         var pipelineState: MTLRenderPipelineState? = nil
         var texture: MTLTexture? = nil
@@ -62,7 +62,8 @@ class IterationRenderer: NSObject, Renderer {
     
     private let commandQueue: MTLCommandQueue
     private let library: MTLLibrary
-    private let textureLoader: MTKTextureLoader
+    
+    private let textureLoader: TextureLoader
     
     private var faces: [Face] = []
     private var facesUniformBuffer: MTLBuffer
@@ -132,7 +133,7 @@ class IterationRenderer: NSObject, Renderer {
         metalDevice = metalView.device!
         
         // Build a texture loader for loading faces
-        textureLoader = MTKTextureLoader(device: metalDevice)
+        textureLoader = TextureLoader(device: metalDevice)
         
         // Build a command queue
         commandQueue = metalDevice.makeCommandQueue()!
@@ -169,102 +170,21 @@ class IterationRenderer: NSObject, Renderer {
     
     // MARK: - Face Management
     
-    func addFace(data: [UInt8], width: Int, height: Int, completionHandler: @escaping () -> Void) {
-        importQueue.async {
-            var face = Face()
-        
-            print("Loading texture from data as \(face.uuid)")
-        
-            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: true)
-            let texture = self.metalDevice.makeTexture(descriptor: descriptor)!
-            texture.label = "Face \(face.uuid)"
-        
-            let region = MTLRegionMake2D(0, 0, width, height)
-            texture.replace(region: region, mipmapLevel: 0, withBytes: data, bytesPerRow: width * 4)
-            
-            let commandBuffer = self.commandQueue.makeCommandBuffer()!
-            
-            let blitCommandEncoder = commandBuffer.makeBlitCommandEncoder()!
-            blitCommandEncoder.generateMipmaps(for: texture)
-            blitCommandEncoder.endEncoding()
-            
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-        
-            // Build the resources for rendering faces to the canvas
-            let pipelineDescriptor = MTLRenderPipelineDescriptor()
-            pipelineDescriptor.label = "Face \(face.uuid) Pipeline"
-            pipelineDescriptor.vertexFunction = self.library.makeFunction(name: "face_instance_vertex")
-            pipelineDescriptor.fragmentFunction = self.library.makeFunction(name: "face_instance_fragment")
-            pipelineDescriptor.colorAttachments[0].pixelFormat = texture.pixelFormat
-            pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
-            pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
-            pipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
-            pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-            pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
-            pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-            pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-            
-            var vertices: [FaceVertex] = [
-                FaceVertex(position: float2(-1.0,  1.0)),
-                FaceVertex(position: float2( 1.0,  1.0)),
-                FaceVertex(position: float2(-1.0, -1.0)),
-                FaceVertex(position: float2( 1.0, -1.0))
-            ]
-        
-            face.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
-            face.texture = texture
-            face.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
-            
-            face.state = .ready
-        
-            self.faces.append(face)
-        
-            self.recalculateScale = true
-            self.canvasIsDirty = true
-            
-            completionHandler()
-        }
-    }
-    
     func addFace(url: URL) {
-        // Build the initial face and inject it
-        let face = Face()
-        faces.append(face)
-        
-        print("Loading texture for \(url) as \(face.uuid)")
-        
-        // Start the loading process
-        let options: [MTKTextureLoader.Option:Any] = [
-            .generateMipmaps : true,
-            .SRGB: true
-        ]
-        
-        textureLoader.newTexture(URL: url, options: options) { (texture, error) in
-            // Find the matching face
-            guard let index = self.faces.index(of: face) else {
-                print("Could not find a matching face after a texture load")
-                return
-            }
+        textureLoader.load(url: url) { (texture, imageSize, error) in
+            var face = Face()
             
-            var updatedFace = self.faces[index]
-            
-            // Handle the error or texture
-            if let loadError = error {
-                print("Error loading texture \(updatedFace.uuid): \(loadError)")
-                updatedFace.state = .error
-            } else if let newTexture = texture {
-                print("Texture loaded for \(updatedFace.uuid)")
-                print("Texture: \(newTexture)")
+            if let newTexture = texture {
+                print("Texture loaded \(face.uuid) for \(url)")
                 
-                newTexture.label = "Face \(updatedFace.uuid)"
+                newTexture.label = "Face \(face.uuid)"
                 
                 // Build the resources for rendering faces to the canvas
                 let pipelineDescriptor = MTLRenderPipelineDescriptor()
-                pipelineDescriptor.label = "Face \(updatedFace.uuid) Pipeline"
+                pipelineDescriptor.label = "Face \(face.uuid) Pipeline"
                 pipelineDescriptor.vertexFunction = self.library.makeFunction(name: "face_instance_vertex")
                 pipelineDescriptor.fragmentFunction = self.library.makeFunction(name: "face_instance_fragment")
-                pipelineDescriptor.colorAttachments[0].pixelFormat = newTexture.pixelFormat
+                pipelineDescriptor.colorAttachments[0].pixelFormat = self.canvasTexture.pixelFormat
                 pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
                 pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
                 pipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
@@ -280,20 +200,28 @@ class IterationRenderer: NSObject, Renderer {
                     FaceVertex(position: float2( 1.0, -1.0))
                 ]
                 
-                updatedFace.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
-                updatedFace.texture = newTexture
-                updatedFace.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
+                face.imageSize = float2(Float(imageSize.width), Float(imageSize.height))
+                face.textureSize = float2(Float(newTexture.width), Float(newTexture.height))
                 
-                updatedFace.state = .ready
+                face.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
+                face.texture = newTexture
+                face.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
+                
+                face.state = .ready
+            } else if let _ = error {
+                print("Failed to load the texture for \(url)")
+                face.state = .error
             } else {
-                print("Texture loader returned neither a texture not an error")
-                updatedFace.state = .error
+                print("Got neither a texture nor an error")
+                face.state = .error
             }
             
-            self.faces[index] = updatedFace
-            
-            self.recalculateScale = true
-            self.canvasIsDirty = true
+            DispatchQueue.main.sync {
+                self.faces.append(face)
+                
+                self.recalculateScale = true
+                self.canvasIsDirty = true
+            }
         }
     }
     
@@ -420,11 +348,11 @@ class IterationRenderer: NSObject, Renderer {
                 for _ in faces {
                     let translateX = rng.nextUniform() * 2.0 - 1.0
                     let translateY = rng.nextUniform() * 2.0 - 1.0
-                    let translationMatrix = float4x4(translationBy: float3(translateX, translateY, 0))
+                    let translationMatrix = float4x4.translate(by: translateX, y: translateY, z: 0.0)
                     
                     let rotation = rng.nextUniform() * maxRotation
                     let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
-                    let rotationMatrix = float4x4(zRotation: Float.pi * 2.0 * (rotation * rotationMultiplier))
+                    let rotationMatrix = float4x4.zRotation(by: Float.pi * 2.0 * (rotation * rotationMultiplier))
                     
                     var uniform = FaceUniform(
                         translationMatrix: translationMatrix,

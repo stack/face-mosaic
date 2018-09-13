@@ -16,6 +16,7 @@
 		D178BADB214341C8000BB0F0 /* IterationShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D178BADA214341C8000BB0F0 /* IterationShaders.metal */; };
 		D178BAE0214593DB000BB0F0 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D178BADF214593DB000BB0F0 /* WindowController.swift */; };
 		D178BAE221459F74000BB0F0 /* Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = D178BAE121459F74000BB0F0 /* Window.swift */; };
+		D181449F214B291200DAE22A /* TextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D181449E214B291200DAE22A /* TextureLoader.swift */; };
 		D1833F5D213F3B83003F6888 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5B213F3B83003F6888 /* MetalKit.framework */; };
 		D1833F5E213F3B83003F6888 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5C213F3B83003F6888 /* Metal.framework */; };
 		D1833F60213F3B8A003F6888 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1833F5F213F3B8A003F6888 /* GameKit.framework */; };
@@ -38,6 +39,7 @@
 		D178BADC21455AB7000BB0F0 /* Face Mosaic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Face Mosaic.entitlements"; sourceTree = "<group>"; };
 		D178BADF214593DB000BB0F0 /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		D178BAE121459F74000BB0F0 /* Window.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Window.swift; sourceTree = "<group>"; };
+		D181449E214B291200DAE22A /* TextureLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLoader.swift; sourceTree = "<group>"; };
 		D1833F5B213F3B83003F6888 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D1833F5C213F3B83003F6888 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		D1833F5F213F3B8A003F6888 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
@@ -122,6 +124,7 @@
 				D18671A3214200CE008FF5E4 /* IterationRenderer.swift */,
 				D178BADA214341C8000BB0F0 /* IterationShaders.metal */,
 				D18671A12141FE61008FF5E4 /* Renderer.swift */,
+				D181449E214B291200DAE22A /* TextureLoader.swift */,
 			);
 			path = Rendering;
 			sourceTree = "<group>";
@@ -211,6 +214,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D181449F214B291200DAE22A /* TextureLoader.swift in Sources */,
 				D18671A22141FE61008FF5E4 /* Renderer.swift in Sources */,
 				D178BAE221459F74000BB0F0 /* Window.swift in Sources */,
 				D186719D2141DECF008FF5E4 /* ColorPickerButton.swift in Sources */,
