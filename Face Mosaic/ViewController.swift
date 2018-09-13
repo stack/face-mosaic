@@ -397,7 +397,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     // MARK: <NSTextFieldDelegate>
     
-    override func controlTextDidChange(_ obj: Notification) {
+    func controlTextDidChange(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else {
             return
         }

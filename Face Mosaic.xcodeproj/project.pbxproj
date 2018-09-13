@@ -32,7 +32,6 @@
 		D12B5610213B4F72005B65D5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D12B5613213B4F72005B65D5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D12B5615213B4F72005B65D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D12B5616213B4F72005B65D5 /* Face_Mosaic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Face_Mosaic.entitlements; sourceTree = "<group>"; };
 		D12B561E213B5564005B65D5 /* ImageCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewItem.swift; sourceTree = "<group>"; };
 		D12B561F213B5564005B65D5 /* ImageCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImageCollectionViewItem.xib; sourceTree = "<group>"; };
 		D178BADA214341C8000BB0F0 /* IterationShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = IterationShaders.metal; sourceTree = "<group>"; };
@@ -91,7 +90,6 @@
 				D12B560E213B4F70005B65D5 /* ViewController.swift */,
 				D12B5612213B4F72005B65D5 /* Main.storyboard */,
 				D12B5615213B4F72005B65D5 /* Info.plist */,
-				D12B5616213B4F72005B65D5 /* Face_Mosaic.entitlements */,
 				D178BADF214593DB000BB0F0 /* WindowController.swift */,
 				D178BAE121459F74000BB0F0 /* Window.swift */,
 			);
@@ -168,6 +166,7 @@
 				TargetAttributes = {
 					D12B5608213B4F70005B65D5 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1000;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
 								enabled = 1;
@@ -367,7 +366,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "us.gerstacker.Face-Mosaic";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -386,7 +385,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "us.gerstacker.Face-Mosaic";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};

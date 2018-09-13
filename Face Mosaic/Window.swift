@@ -33,7 +33,7 @@ class Window: NSWindow, NSDraggingDestination {
     // MARK: <NSDraggingDestination>
     
     func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        let pasteboard = sender.draggingPasteboard()
+        let pasteboard = sender.draggingPasteboard
         
         guard let objects = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) else {
             return []
@@ -50,7 +50,7 @@ class Window: NSWindow, NSDraggingDestination {
     }
     
     func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pasteboard = sender.draggingPasteboard()
+        let pasteboard = sender.draggingPasteboard
         
         guard let objects = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) else {
             return false
@@ -65,7 +65,7 @@ class Window: NSWindow, NSDraggingDestination {
     }
     
     func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pasteboard = sender.draggingPasteboard()
+        let pasteboard = sender.draggingPasteboard
         
         guard let objects = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) else {
             return false
