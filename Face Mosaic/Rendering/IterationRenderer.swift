@@ -349,11 +349,6 @@ class IterationRenderer: NSObject, Renderer {
     // MARK: - Rendering Functions
     
     func draw(in view: MTKView) {
-        // Ensure we have somewhere to draw to
-        guard let drawable = view.currentDrawable else {
-            return
-        }
-        
         // Rebuild the canvas if needed
         if rebuildCanvasTexture {
             let descriptor = IterationRenderer.canvasTextureDescriptor(format: metalView.colorPixelFormat, size: canvasSize)
@@ -384,30 +379,25 @@ class IterationRenderer: NSObject, Renderer {
         }
         
         // Render the canvas to the drawable
-        renderCanvas(to: drawable.texture, commandBuffer: commandBuffer)
+        if let renderPassDescriptor = metalView.currentRenderPassDescriptor {
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+            encoder.setRenderPipelineState(canvasPipelineState)
+            encoder.setVertexBuffer(canvasUniformBuffer, offset: 0, index: 0)
+            encoder.setFragmentTexture(canvasTexture, index: 0)
+            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            encoder.endEncoding()
+            
+            if let drawable = view.currentDrawable {
+                commandBuffer.present(drawable)
+            }
+        }
         
         // Finalize the drawing
-        commandBuffer.present(drawable)
         commandBuffer.commit()
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         sceneSize = float2(Float(size.width), Float(size.height))
-    }
-    
-    private func renderCanvas(to texture: MTLTexture, commandBuffer: MTLCommandBuffer) {
-        let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = texture
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
-        renderPassDescriptor.colorAttachments[0].storeAction = .store
-        
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-        encoder.setRenderPipelineState(canvasPipelineState)
-        encoder.setVertexBuffer(canvasUniformBuffer, offset: 0, index: 0)
-        encoder.setFragmentTexture(canvasTexture, index: 0)
-        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-        encoder.endEncoding()
     }
     
     // MARK: - Export Functions

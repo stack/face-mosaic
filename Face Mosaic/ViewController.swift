@@ -93,7 +93,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         }
         
         let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
+        panel.allowsMultipleSelection = true
         panel.allowedFileTypes = [kUTTypePNG as String];
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
@@ -101,7 +101,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         panel.beginSheetModal(for: window) { (response) in
             if response == .OK {
-                if let url = panel.url {
+                for url in panel.urls {
                     self.addImage(from: url)
                 }
             }
@@ -317,9 +317,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         // Prepare the renderer
         metalView.device = MTLCreateSystemDefaultDevice()
-        // metalView.colorPixelFormat = .bgra8Unorm_srgb
         
-        // renderer = OriginalRenderer(metalView: metalView)
         renderer = IterationRenderer(metalView: metalView)
         renderer.mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
         
@@ -334,6 +332,9 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         // Update the initial UI elements
         setRemoveButtonState()
+        
+        // Remove the background from the collection view
+        self.imageCollectionView.backgroundColors = [.clear]
     }
     
     
