@@ -27,10 +27,10 @@ class IterationRenderer: NSObject, Renderer {
         
         var imageSize: float2 = float2(0.0, 0.0)
         var textureSize: float2 = float2(0.0, 0.0)
+        var scalingMatrix: float4x4 = float4x4.identity()
         
         var pipelineState: MTLRenderPipelineState? = nil
         var texture: MTLTexture? = nil
-        var vertexBuffer: MTLBuffer? = nil
         
         init() {
             uuid = UUID()
@@ -41,18 +41,12 @@ class IterationRenderer: NSObject, Renderer {
         }
     }
     
-    private struct FaceVertex {
-        let position: float2
-    }
-    
     private struct FaceUniform {
-        let translationMatrix: float4x4
-        let rotationMatrix: float4x4
-        let projectionMatrix: float4x4
+        let modelMatrix: float4x4
     }
     
-    private struct CanvasVertex {
-        let position: float2
+    private struct CanvasUniform {
+        let modelMatrix: float4x4
     }
     
     // MARK: - Properties
@@ -72,11 +66,11 @@ class IterationRenderer: NSObject, Renderer {
         didSet { canvasIsDirty = true }
     }
     
-    var canvasSize: CGSize = CGSize(width: 640.0, height: 480.0) {
+    var canvasSize: float2 = float2(640.0, 480.0) {
         didSet { rebuildCanvasTexture = true }
     }
     
-    var iterations: UInt = 1 {
+    var iterations: Int = 1 {
         didSet {
             if iterations != oldValue {
                 canvasIsDirty = true
@@ -101,7 +95,7 @@ class IterationRenderer: NSObject, Renderer {
         }
     }
     
-    var sceneSize: CGSize = CGSize(width: 200.0, height: 200.0) {
+    var sceneSize: float2 = float2(200.0, 200.0) {
         didSet { relayoutCanvasTexture = true }
     }
     
@@ -115,14 +109,12 @@ class IterationRenderer: NSObject, Renderer {
     
     private var canvasPipelineState: MTLRenderPipelineState
     private var canvasTexture: MTLTexture
-    private var canvasVertexBuffer: MTLBuffer
+    private var canvasUniformBuffer: MTLBuffer
     
     private var canvasIsDirty: Bool = true
     private var rebuildCanvasTexture: Bool = true
     private var recalculateScale: Bool = true
     private var relayoutCanvasTexture: Bool = true
-    
-    private let importQueue = DispatchQueue(label: "Renderer Import")
     
     
     // MARK: - Initialization
@@ -161,7 +153,7 @@ class IterationRenderer: NSObject, Renderer {
         let canvasDescriptor = IterationRenderer.canvasTextureDescriptor(format: metalView.colorPixelFormat, size: canvasSize)
         canvasTexture = metalDevice.makeTexture(descriptor: canvasDescriptor)!
         
-        canvasVertexBuffer = metalDevice.makeBuffer(length: MemoryLayout<CanvasVertex>.size * 4, options: [])!
+        canvasUniformBuffer = metalDevice.makeBuffer(length: MemoryLayout<CanvasUniform>.size, options: [])!
         
         // Build a dummy buffer as a place holder for the face uniform buffer
         facesUniformBuffer = metalDevice.makeBuffer(length: 1, options: [])!
@@ -193,19 +185,11 @@ class IterationRenderer: NSObject, Renderer {
                 pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
                 pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
                 
-                var vertices: [FaceVertex] = [
-                    FaceVertex(position: float2(-1.0,  1.0)),
-                    FaceVertex(position: float2( 1.0,  1.0)),
-                    FaceVertex(position: float2(-1.0, -1.0)),
-                    FaceVertex(position: float2( 1.0, -1.0))
-                ]
-                
                 face.imageSize = float2(Float(imageSize.width), Float(imageSize.height))
                 face.textureSize = float2(Float(newTexture.width), Float(newTexture.height))
                 
                 face.pipelineState = try! self.metalDevice.makeRenderPipelineState(descriptor: pipelineDescriptor)
                 face.texture = newTexture
-                face.vertexBuffer = self.metalDevice.makeBuffer(bytes: &vertices, length: MemoryLayout<FaceVertex>.size * vertices.count, options: [])
                 
                 face.state = .ready
             } else if let _ = error {
@@ -232,36 +216,25 @@ class IterationRenderer: NSObject, Renderer {
     
     // MARK: - Canvas Management
     
-    private static func canvasTextureDescriptor(format: MTLPixelFormat, size: CGSize) -> MTLTextureDescriptor {
+    private static func canvasTextureDescriptor(format: MTLPixelFormat, size: float2) -> MTLTextureDescriptor {
         let descriptor = MTLTextureDescriptor()
         descriptor.textureType = .type2D
-        descriptor.width = Int(size.width)
-        descriptor.height = Int(size.height)
+        descriptor.width = Int(size.x)
+        descriptor.height = Int(size.y)
         descriptor.pixelFormat = format
         descriptor.usage = [.renderTarget, .shaderRead]
         
         return descriptor
     }
     
-    private static func canvasVertices(canvasSize: CGSize, sceneSize: CGSize) -> [CanvasVertex] {
-        let scene = float2(Float(sceneSize.width), Float(sceneSize.height))
-        let canvas = float2(Float(canvasSize.width), Float(canvasSize.height))
+    private static func canvasVertices(canvasSize: float2, sceneSize: float2) -> CanvasUniform {
+        let delta = sceneSize / canvasSize
+        let factor = delta.min() ?? 1.0
         
-        let delta = scene / canvas
-        let scaleFactor = delta.min()!
+        let scaledSize = canvasSize * factor
+        let scaledOffset = scaledSize / sceneSize
         
-        let scaledSize = canvas * scaleFactor
-        let scaledOffset = (scene - scaledSize) / 2.0
-        
-        let leftBottomOffset = (scaledOffset / scene) * 2.0 - float2(1.0)
-        let rightTopOffset = ((scene - scaledOffset) / scene) * 2.0 - float2(1.0)
-        
-        return [
-            CanvasVertex(position: float2(leftBottomOffset[0], rightTopOffset[1])),
-            CanvasVertex(position: float2(rightTopOffset[0],   rightTopOffset[1])),
-            CanvasVertex(position: float2(leftBottomOffset[0], leftBottomOffset[1])),
-            CanvasVertex(position: float2(rightTopOffset[0],   leftBottomOffset[1]))
-        ]
+        return CanvasUniform(modelMatrix: float4x4.scale(by: scaledOffset.x, y: scaledOffset.y, z: 1.0))
     }
     
     private func calculateScalingMatrices() {
@@ -270,28 +243,15 @@ class IterationRenderer: NSObject, Renderer {
                 continue
             }
             
-            let newFace = face
-            let texture = newFace.texture!
+            var newFace = face
             
-            let sceneSize = float2(Float(canvasSize.width), Float(canvasSize.height))
-            let textureSize = float2(Float(texture.width), Float(texture.height))
-            let availableSize = sceneSize * scale
-            
-            let delta = availableSize / textureSize
+            let delta = canvasSize / face.imageSize
             let factor = delta.min()!
             
-            let scaledSize = textureSize * factor
-            let normalizedOffset = (scaledSize / sceneSize)
+            let scaledSize = face.textureSize * factor
+            let normalizedOffset = (scaledSize / canvasSize)
             
-            var vertices: [FaceVertex] = [
-                FaceVertex(position: float2(normalizedOffset[0] * -1.0, normalizedOffset[1])),
-                FaceVertex(position: float2(normalizedOffset[0],        normalizedOffset[1])),
-                FaceVertex(position: float2(normalizedOffset[0] * -1.0, normalizedOffset[1] * -1.0)),
-                FaceVertex(position: float2(normalizedOffset[0],        normalizedOffset[1] * -1.0)),
-            ]
-            
-            let buffer = newFace.vertexBuffer!
-            memcpy(buffer.contents(), &vertices, MemoryLayout<FaceVertex>.size * vertices.count)
+            newFace.scalingMatrix = float4x4.scale(by: normalizedOffset.x, y: normalizedOffset.y, z: 1.0)
             
             faces[idx] = newFace
         }
@@ -314,6 +274,7 @@ class IterationRenderer: NSObject, Renderer {
         renderPassDescriptor.colorAttachments[0].storeAction = .store
         
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+        encoder.setViewport(MTLViewport(originX: 0.0, originY: 0.0, width: Double(canvasSize.x), height: Double(canvasSize.y), znear: 0.0, zfar: 1.0))
         
         // Fill in any missing scaling matrices
         if recalculateScale {
@@ -327,7 +288,7 @@ class IterationRenderer: NSObject, Renderer {
         // Build all of the uniforms for each iteration of each face
         if faces.count > 0 && iterations > 0 {
             let memorySize = MemoryLayout<FaceUniform>.size
-            let bufferSize = memorySize * Int(iterations) * faces.count
+            let bufferSize = memorySize * iterations * faces.count
             
             if facesUniformBuffer.length != bufferSize {
                 facesUniformBuffer = metalDevice.makeBuffer(length: bufferSize, options: [])!
@@ -335,29 +296,24 @@ class IterationRenderer: NSObject, Renderer {
             
             var contents = facesUniformBuffer.contents()
             
-            let aspectRatio = Float(canvasSize.width / canvasSize.height)
-            
-            let projectionMatrix = float4x4(
-                float4(1.0 / aspectRatio, 0.0, 0.0, 0.0),
-                float4(0.0, 1.0, 0.0, 0.0),
-                float4(0.0, 0.0, 1.0, 0.0),
-                float4(0.0, 0.0, 0.0, 1.0)
-            )
-            
             for _ in 0 ..< iterations {
-                for _ in faces {
-                    let translateX = rng.nextUniform() * 2.0 - 1.0
-                    let translateY = rng.nextUniform() * 2.0 - 1.0
-                    let translationMatrix = float4x4.translate(by: translateX, y: translateY, z: 0.0)
+                for face in faces {
+                    var matrix = float4x4.identity()
+                    
+                    matrix = matrix.scaled(by: scale, y: scale, z: 1.0)
                     
                     let rotation = rng.nextUniform() * maxRotation
                     let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
-                    let rotationMatrix = float4x4.zRotation(by: Float.pi * 2.0 * (rotation * rotationMultiplier))
+                    matrix = matrix.zRotated(by: .pi * 2.0 * (rotation * rotationMultiplier))
+                    
+                    matrix = face.scalingMatrix * matrix
+                    
+                    let translateX = rng.nextUniform() * 2.0 - 1.0
+                    let translateY = rng.nextUniform() * 2.0 - 1.0
+                    matrix = matrix.translated(by: translateX, y: translateY, z: 0.0)
                     
                     var uniform = FaceUniform(
-                        translationMatrix: translationMatrix,
-                        rotationMatrix: rotationMatrix,
-                        projectionMatrix: projectionMatrix
+                        modelMatrix: matrix
                     )
                     
                     memcpy(contents, &uniform, memorySize)
@@ -372,12 +328,15 @@ class IterationRenderer: NSObject, Renderer {
                         continue
                     }
                     
+                    guard let texture = face.texture else {
+                        continue
+                    }
+                    
                     let offset = iteration * faces.count + idx
                     
                     encoder.setRenderPipelineState(face.pipelineState!)
-                    encoder.setVertexBuffer(face.vertexBuffer!, offset: 0, index: 0)
-                    encoder.setVertexBuffer(facesUniformBuffer, offset: memorySize * offset, index: 1)
-                    encoder.setFragmentTexture(face.texture!, index: 0)
+                    encoder.setVertexBuffer(facesUniformBuffer, offset: memorySize * offset, index: 0)
+                    encoder.setFragmentTexture(texture, index: 0)
                     encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
                 }
             }
@@ -409,8 +368,8 @@ class IterationRenderer: NSObject, Renderer {
         
         // Re-layout the canvas if needed
         if relayoutCanvasTexture {
-            let vertices = IterationRenderer.canvasVertices(canvasSize: canvasSize, sceneSize: sceneSize)
-            memcpy(canvasVertexBuffer.contents(), vertices, MemoryLayout<CanvasVertex>.size * vertices.count)
+            var uniform = IterationRenderer.canvasVertices(canvasSize: canvasSize, sceneSize: sceneSize)
+            memcpy(canvasUniformBuffer.contents(), &uniform, MemoryLayout<CanvasUniform>.size)
             
             relayoutCanvasTexture = false
         }
@@ -433,7 +392,7 @@ class IterationRenderer: NSObject, Renderer {
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        sceneSize = size
+        sceneSize = float2(Float(size.width), Float(size.height))
     }
     
     private func renderCanvas(to texture: MTLTexture, commandBuffer: MTLCommandBuffer) {
@@ -445,7 +404,7 @@ class IterationRenderer: NSObject, Renderer {
         
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
         encoder.setRenderPipelineState(canvasPipelineState)
-        encoder.setVertexBuffer(canvasVertexBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(canvasUniformBuffer, offset: 0, index: 0)
         encoder.setFragmentTexture(canvasTexture, index: 0)
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         encoder.endEncoding()
@@ -454,8 +413,8 @@ class IterationRenderer: NSObject, Renderer {
     // MARK: - Export Functions
     
     func makeImageBuffer() -> MTLBuffer {
-        let imagesBytesPerRow = Int(canvasSize.width) * 4
-        let imageByteCount = imagesBytesPerRow * Int(canvasSize.height)
+        let imagesBytesPerRow = Int(canvasSize.x) * 4
+        let imageByteCount = imagesBytesPerRow * Int(canvasSize.y)
         let imageBuffer = metalDevice.makeBuffer(length: imageByteCount, options: [])!
         
         let commandQueue = metalDevice.makeCommandQueue()!
@@ -467,7 +426,7 @@ class IterationRenderer: NSObject, Renderer {
             sourceSlice: 0,
             sourceLevel: 0,
             sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
-            sourceSize: MTLSize(width: Int(canvasSize.width), height: Int(canvasSize.height), depth: 1),
+            sourceSize: MTLSize(width: Int(canvasSize.x), height: Int(canvasSize.y), depth: 1),
             to: imageBuffer,
             destinationOffset: 0,
             destinationBytesPerRow: imagesBytesPerRow,

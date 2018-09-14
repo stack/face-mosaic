@@ -9,8 +9,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct CanvasVertexIn {
-    packed_float2 position;
+struct CanvasVertexUniform {
+    float4x4 modelMatrix;
 };
 
 struct CanvasVertexOut {
@@ -18,9 +18,16 @@ struct CanvasVertexOut {
     float2 texturePosition;
 };
 
-vertex CanvasVertexOut canvas_vertex(const device CanvasVertexIn* vertices [[ buffer(0) ]],
+vertex CanvasVertexOut canvas_vertex(const device CanvasVertexUniform& uniform [[ buffer(0) ]],
                                      ushort vid [[ vertex_id ]])
 {
+    constexpr float2 positions[4] = {
+        float2(-1.0,  1.0),
+        float2( 1.0,  1.0),
+        float2(-1.0, -1.0),
+        float2( 1.0, -1.0),
+    };
+    
     constexpr float2 texturePositions[4] = {
         float2(0.0, 0.0),
         float2(1.0, 0.0),
@@ -28,10 +35,8 @@ vertex CanvasVertexOut canvas_vertex(const device CanvasVertexIn* vertices [[ bu
         float2(1.0, 1.0)
     };
     
-    CanvasVertexIn vertexIn = vertices[vid];
-    
     CanvasVertexOut vertexOut;
-    vertexOut.position = float4(vertexIn.position, 0.0, 1.0);
+    vertexOut.position = uniform.modelMatrix * float4(positions[vid], 0.0, 1.0);
     vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
@@ -59,16 +64,18 @@ struct FaceVertexOut {
 };
 
 struct FaceUniform {
-    float4x4 translation;
-    float4x4 rotation;
-    float4x4 projection;
+    float4x4 model;
 };
 
-vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[ buffer(0) ]],
-                                          const device FaceUniform& uniform [[ buffer(1) ]],
-                                          ushort vid [[ vertex_id ]],
-                                          ushort iid [[ instance_id ]])
+vertex FaceVertexOut face_instance_vertex(const device FaceUniform& uniform [[ buffer(0) ]],
+                                          ushort vid [[ vertex_id ]])
 {
+    constexpr float2 positions[4] = {
+        float2(-1.0,  1.0),
+        float2( 1.0,  1.0),
+        float2(-1.0, -1.0),
+        float2( 1.0, -1.0),
+    };
     
     constexpr float2 texturePositions[4] = {
         float2(0.0, 0.0),
@@ -77,18 +84,15 @@ vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[
         float2(1.0, 1.0)
     };
     
-    FaceVertexIn vertexIn = vertices[vid];
-    
     FaceVertexOut vertexOut;
-    // vertexOut.position = uniform.projection * uniform.rotation * float4(vertexIn.position, 0.0, 1.0);
-    vertexOut.position = uniform.translation * uniform.rotation * float4(vertexIn.position, 0.0, 1.0);
+    vertexOut.position = uniform.model * float4(positions[vid], 0.0, 1.0);
     vertexOut.texturePosition = texturePositions[vid];
     
     return vertexOut;
 }
 
 fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
-                                       texture2d<float, access::sample> texture [[ texture(0) ]])
+                                       texture2d<half, access::sample> texture [[ texture(0) ]])
 {
     constexpr sampler textureSampler(mag_filter::linear,
                                      min_filter::linear,
@@ -96,5 +100,5 @@ fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
                                      t_address::clamp_to_edge,
                                      r_address::clamp_to_edge);
     
-    return (half4)texture.sample(textureSampler, faceVertex.texturePosition);
+    return texture.sample(textureSampler, faceVertex.texturePosition);
 }

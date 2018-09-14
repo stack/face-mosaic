@@ -42,10 +42,10 @@ extension float4x4 {
     }
     
     static func translate(by x: Float, y: Float, z: Float) -> float4x4 {
-        let p = float4(1.0, 0.0, 0.0, x)
-        let q = float4(0.0, 1.0, 0.0, y)
-        let r = float4(0.0, 0.0, 1.0, z)
-        let s = float4(0.0, 0.0, 0.0, 1.0)
+        let p = float4(1.0, 0.0, 0.0, 0.0)
+        let q = float4(0.0, 1.0, 0.0, 0.0)
+        let r = float4(0.0, 0.0, 1.0, 0.0)
+        let s = float4(x,   y,   z,   1.0)
         
         return float4x4(p, q, r, s)
     }

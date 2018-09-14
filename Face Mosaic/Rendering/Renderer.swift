@@ -9,14 +9,15 @@
 import AppKit
 import Metal
 import MetalKit
+import simd
 
 protocol Renderer: MTKViewDelegate {
     var seedData: Data { get set }
-    var canvasSize: CGSize { get set }
-    var sceneSize: CGSize { get set }
+    var canvasSize: float2 { get set }
+    var sceneSize: float2 { get set }
     
     var backgroundColor: NSColor { get set }
-    var iterations: UInt { get set }
+    var iterations: Int { get set }
     var maxRotation: Float { get set }
     var scale: Float { get set }
     

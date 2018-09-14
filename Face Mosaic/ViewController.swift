@@ -198,11 +198,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             
             // Generate the image from the data
             let image = CGImage(
-                width: Int(self.renderer.canvasSize.width),
-                height: Int(self.renderer.canvasSize.height),
+                width: Int(self.renderer.canvasSize.x),
+                height: Int(self.renderer.canvasSize.y),
                 bitsPerComponent: 8,
                 bitsPerPixel: 32,
-                bytesPerRow: Int(self.renderer.canvasSize.width) * 4,
+                bytesPerRow: Int(self.renderer.canvasSize.x) * 4,
                 space: CGColorSpaceCreateDeviceRGB(),
                 bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),  CGBitmapInfo.byteOrder32Little],
                 provider: dataProvider,
@@ -253,7 +253,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
 
     @IBAction func interationsChanged(_ sender: Any?) {
-        let iterations = UInt(iterationsSlider.integerValue)
+        let iterations = Int(iterationsSlider.integerValue)
         renderer.iterations = iterations
         
         let template = NSLocalizedString("Iterations: %i", comment: "Iterations Label Template")
@@ -266,6 +266,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         let template = NSLocalizedString("Max Rotation: %iº", comment: "Max Rotation Label Template")
         maxRotationLabel.stringValue = String(format: template, Int(maxRotationSlider.floatValue))
+        
+        if value == 0.0 {
+            tickFeedback()
+        }
     }
     
     @IBAction func removeImage(_ sender: Any?) {
@@ -288,6 +292,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
         scaleLabel.stringValue = String(format: template, Int(value))
+        
+        if value == 50.0 {
+            tickFeedback()
+        }
     }
     
     @IBAction func toggleBackgroundColorPicker(_ sender: Any?) {
@@ -374,7 +382,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 return
             }
             
-            let size = CGSize(width: width, height: height)
+            let size = float2(Float(width), Float(height))
             renderer.canvasSize = size
         } else if textField == seedTextField {
             let seed = seedTextField.stringValue.isEmpty ? "Seed" : seedTextField.stringValue
@@ -385,6 +393,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     // MARK: - Utilities
+    
+    private func tickFeedback() {
+        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .default)
+    }
     
     private func toggleAvailability(enabled: Bool) {
         addImageButton.isEnabled = enabled

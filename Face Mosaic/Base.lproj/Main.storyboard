@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14313.18"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
-        <capability name="stacking Non-gravity area distributions on NSStackView" minToolsVersion="7.0" minSystemVersion="10.11"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -685,7 +685,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" customClass="WindowController" customModule="Face_Mosaic" customModuleProvider="target" sceneMemberID="viewController">
-                    <window key="window" title="Face Mosaic" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA" customClass="Window" customModule="Face_Mosaic" customModuleProvider="target">
+                    <window key="window" title="Face Mosaic" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA" customClass="Window" customModule="Face_Mosaic" customModuleProvider="target">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -742,11 +742,11 @@
                                                             </subviews>
                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                         </clipView>
-                                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="dZP-y8-q8L">
+                                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="dZP-y8-q8L">
                                                             <rect key="frame" x="0.0" y="458" width="241" height="16"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                         </scroller>
-                                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="W2h-sk-EhJ">
+                                                        <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="W2h-sk-EhJ">
                                                             <rect key="frame" x="234" y="1" width="15" height="143"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                         </scroller>
@@ -814,10 +814,10 @@
                                                 <rect key="frame" x="530" y="0.0" width="200" height="495"/>
                                                 <subviews>
                                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdv-sZ-orc">
-                                                        <rect key="frame" x="20" y="164" width="160" height="311"/>
+                                                        <rect key="frame" x="20" y="165" width="160" height="310"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WXL-z0-yPh">
-                                                                <rect key="frame" x="-2" y="294" width="105" height="17"/>
+                                                                <rect key="frame" x="-2" y="293" width="105" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Max Rotation: 0º" id="hIN-DU-lO3">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -825,14 +825,14 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hBq-L4-zpg">
-                                                                <rect key="frame" x="-2" y="269" width="164" height="19"/>
-                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="180" tickMarkPosition="above" sliderType="linear" id="Pu2-6b-knB"/>
+                                                                <rect key="frame" x="-2" y="261" width="164" height="24"/>
+                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="-180" maxValue="180" tickMarkPosition="above" numberOfTickMarks="1" sliderType="linear" id="Pu2-6b-knB"/>
                                                                 <connections>
                                                                     <action selector="maxRotationChanged:" target="XfG-lQ-9wD" id="cGx-mS-Adr"/>
                                                                 </connections>
                                                             </slider>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XPq-m8-nUG">
-                                                                <rect key="frame" x="-2" y="246" width="75" height="17"/>
+                                                                <rect key="frame" x="-2" y="238" width="75" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Iterations: 1" id="yqV-L2-d4T">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -840,14 +840,14 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MQq-4f-oW2">
-                                                                <rect key="frame" x="-2" y="221" width="164" height="19"/>
+                                                                <rect key="frame" x="-2" y="213" width="164" height="19"/>
                                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="1000" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="l8c-4l-308"/>
                                                                 <connections>
                                                                     <action selector="interationsChanged:" target="XfG-lQ-9wD" id="4k4-Cz-3Bx"/>
                                                                 </connections>
                                                             </slider>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jWz-66-Ma2">
-                                                                <rect key="frame" x="-2" y="198" width="72" height="17"/>
+                                                                <rect key="frame" x="-2" y="190" width="72" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scale: 50%" id="ze9-lV-uwU">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -855,14 +855,14 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o4D-jT-jud">
-                                                                <rect key="frame" x="-2" y="173" width="164" height="19"/>
-                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="vG5-OL-zNB"/>
+                                                                <rect key="frame" x="-2" y="158" width="164" height="24"/>
+                                                                <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" numberOfTickMarks="1" sliderType="linear" id="vG5-OL-zNB"/>
                                                                 <connections>
                                                                     <action selector="scaleChanged:" target="XfG-lQ-9wD" id="sfe-GN-QCv"/>
                                                                 </connections>
                                                             </slider>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6vP-7r-pYe">
-                                                                <rect key="frame" x="-2" y="150" width="117" height="17"/>
+                                                                <rect key="frame" x="-2" y="135" width="117" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Background Color:" id="wup-Bx-GKT">
                                                                     <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -870,7 +870,7 @@
                                                                 </textFieldCell>
                                                             </textField>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NYg-mJ-WfD" customClass="ColorPickerButton" customModule="Face_Mosaic" customModuleProvider="target">
-                                                                <rect key="frame" x="0.0" y="110" width="160" height="32"/>
+                                                                <rect key="frame" x="0.0" y="110" width="160" height="17"/>
                                                                 <buttonCell key="cell" type="bevel" title="Color Picker" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="P6m-lD-M4T">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                     <font key="font" metaFont="system"/>
@@ -899,7 +899,7 @@
                                                                         <rect key="frame" x="0.0" y="0.0" width="69" height="22"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="640" drawsBackground="YES" id="NVj-Wv-q2c">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
@@ -918,7 +918,7 @@
                                                                         <rect key="frame" x="92" y="0.0" width="68" height="22"/>
                                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="480" drawsBackground="YES" id="WEK-qd-GEh">
                                                                             <font key="font" metaFont="system"/>
-                                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
@@ -952,7 +952,7 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="96" height="22"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="Seed" drawsBackground="YES" id="SlY-uA-BkU">
                                                                     <font key="font" metaFont="system"/>
-                                                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                                 <connections>
