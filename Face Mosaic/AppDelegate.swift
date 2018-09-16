@@ -13,7 +13,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Properties
     
-    private var windowController: WindowController? = nil
+    private var windowController: WindowController? {
+        for window in NSApplication.shared.windows {
+            if let controller = window.windowController as? WindowController {
+                return controller
+            }
+        }
+        
+        return nil
+    }
     
     private var filesToOpen: [String] = []
 
@@ -42,16 +50,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        guard let controller = NSApplication.shared.mainWindow?.windowController as? WindowController else {
+        if let controller = windowController {
+            for file in filesToOpen {
+                controller.open(file: file)
+            }
+            
+            filesToOpen.removeAll()
+        } else {
             print("Application launched without the main window controller")
-            return
         }
-        
-        for file in filesToOpen {
-            controller.open(file: file)
-        }
-        
-        windowController = controller
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
