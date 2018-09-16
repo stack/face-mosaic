@@ -26,4 +26,8 @@ class WindowController: NSWindowController, NSWindowDelegate, WindowDelegate {
         
         viewController.addImage(from: url)
     }
+    
+    override func windowDidLoad() {
+        super.windowDidLoad()
+    }
 }

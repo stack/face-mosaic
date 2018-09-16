@@ -919,7 +919,7 @@
                                             <stackView orientation="horizontal" alignment="centerY" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L79-Ph-gdQ">
                                                 <rect key="frame" x="0.0" y="55" width="160" height="50"/>
                                                 <beginningViews>
-                                                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JlY-cv-3Kd">
+                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JlY-cv-3Kd">
                                                         <rect key="frame" x="0.0" y="14" width="71" height="22"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="640" placeholderString="Width" drawsBackground="YES" id="Vf3-yR-Dfi">
                                                             <font key="font" usesAppearanceFont="YES"/>
@@ -932,7 +932,7 @@
                                                     </textField>
                                                 </beginningViews>
                                                 <middleViews>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EBD-gB-zx0">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EBD-gB-zx0">
                                                         <rect key="frame" x="73" y="17" width="15" height="17"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="x" id="Yfz-Ax-fzW">
                                                             <font key="font" metaFont="system"/>
@@ -942,7 +942,7 @@
                                                     </textField>
                                                 </middleViews>
                                                 <endViews>
-                                                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y8c-jY-gEs">
+                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y8c-jY-gEs">
                                                         <rect key="frame" x="90" y="14" width="70" height="22"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="480" placeholderString="Height" drawsBackground="YES" id="Cgd-BS-TQ9">
                                                             <font key="font" metaFont="system"/>

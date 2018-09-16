@@ -54,6 +54,68 @@ fragment half4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
     return (half4)texture.sample(textureSampler, canvasVertex.texturePosition);
 }
 
+struct CheckeredVertexUniform {
+    float2 screenSize;
+    float2 dimensions;
+};
+
+struct CheckeredVertexOut {
+    float4 position [[ position ]];
+    float2 spacePosition;
+};
+
+vertex CheckeredVertexOut checkered_vertex(unsigned int vid [[ vertex_id ]])
+{
+    constexpr float2 spacePositions[4] = {
+        float2(0.0, 0.0),
+        float2(1.0, 0.0),
+        float2(0.0, 1.0),
+        float2(1.0, 1.0)
+    };
+    
+    constexpr float2 positions[4] = {
+        float2(-1.0, 1.0),
+        float2( 1.0, 1.0),
+        float2(-1.0, -1.0),
+        float2( 1.0, -1.0)
+    };
+    
+    CheckeredVertexOut vertexOut;
+    vertexOut.position = float4(positions[vid], 0.0, 1.0);
+    vertexOut.spacePosition = spacePositions[vid];
+    
+    return vertexOut;
+}
+
+fragment half4 checkered_fragment(CheckeredVertexOut vertexData [[ stage_in ]],
+                                 const device CheckeredVertexUniform& uniform)
+{
+    float2 pixelPosition = uniform.screenSize * vertexData.spacePosition;
+    
+    float2 blockPosition = floor(pixelPosition) / uniform.dimensions;
+    int2 clippedBlockPosition = (int2)blockPosition;
+    
+    bool xEven = clippedBlockPosition.x % 2 == 0;
+    bool yEven = clippedBlockPosition.y % 2 == 0;
+    
+    constexpr half4 gray = half4(0.84, 0.84, 0.84, 1.0);
+    constexpr half4 white = half4(1.0, 1.0, 1.0, 1.0);
+    
+    if (xEven) {
+        if (yEven) {
+            return white;
+        } else {
+            return gray;
+        }
+    } else {
+        if (yEven) {
+            return gray;
+        } else {
+            return white;
+        }
+    }
+}
+
 struct FaceVertexIn {
     packed_float2 position;
 };

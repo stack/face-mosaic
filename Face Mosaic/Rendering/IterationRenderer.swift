@@ -13,6 +13,15 @@ import MetalKit
 
 class IterationRenderer: NSObject, Renderer {
     
+    private struct CanvasUniform {
+        let modelMatrix: float4x4
+    }
+    
+    private struct CheckersVertexUniform {
+        let screenSize: float2
+        let dimensions: float2
+    }
+    
     private struct Face: Equatable {
         enum State {
             case new
@@ -42,10 +51,6 @@ class IterationRenderer: NSObject, Renderer {
     }
     
     private struct FaceUniform {
-        let modelMatrix: float4x4
-    }
-    
-    private struct CanvasUniform {
         let modelMatrix: float4x4
     }
     
@@ -96,7 +101,10 @@ class IterationRenderer: NSObject, Renderer {
     }
     
     var sceneSize: float2 = float2(200.0, 200.0) {
-        didSet { relayoutCanvasTexture = true }
+        didSet {
+            relayoutCanvasTexture = true
+            rebuildCheckeredUniform = true
+        }
     }
     
     var seedData: Data = "Seed.data".data(using: .utf8)! {
@@ -111,10 +119,14 @@ class IterationRenderer: NSObject, Renderer {
     private var canvasTexture: MTLTexture
     private var canvasUniformBuffer: MTLBuffer
     
+    private var checkeredPipelineState: MTLRenderPipelineState
+    private var checkeredUniformBuffer: MTLBuffer
+    
     private var canvasIsDirty: Bool = true
     private var rebuildCanvasTexture: Bool = true
     private var recalculateScale: Bool = true
     private var relayoutCanvasTexture: Bool = true
+    private var rebuildCheckeredUniform: Bool = true
     
     
     // MARK: - Initialization
@@ -133,6 +145,17 @@ class IterationRenderer: NSObject, Renderer {
         
         // Get the default library for the shaders
         library = metalDevice.makeDefaultLibrary()!
+        
+        // Build the resources for the checkered background
+        let checkeredPipelineDescriptor = MTLRenderPipelineDescriptor()
+        checkeredPipelineDescriptor.label = "Checkered Pipeline"
+        checkeredPipelineDescriptor.vertexFunction = library.makeFunction(name: "checkered_vertex")
+        checkeredPipelineDescriptor.fragmentFunction = library.makeFunction(name: "checkered_fragment")
+        checkeredPipelineDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
+        
+        checkeredPipelineState = try! metalDevice.makeRenderPipelineState(descriptor: checkeredPipelineDescriptor)
+        
+        checkeredUniformBuffer = metalDevice.makeBuffer(length: MemoryLayout<CheckersVertexUniform>.size, options: [])!
         
         // Build the resources for rendering the canvas to the screen
         let canvasPipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -378,9 +401,33 @@ class IterationRenderer: NSObject, Renderer {
             canvasIsDirty = false
         }
         
+        // Rebuild the checked uniform if needed
+        if rebuildCheckeredUniform {
+            let scalingFactor: Float
+            if let factor = view.window?.screen?.backingScaleFactor {
+                scalingFactor = Float(factor)
+            } else {
+                scalingFactor = 1.0
+            }
+            
+            var uniform = CheckersVertexUniform(
+                screenSize: sceneSize,
+                dimensions: float2(16.0 * scalingFactor, 16.0 * scalingFactor)
+            )
+            
+            memcpy(checkeredUniformBuffer.contents(), &uniform, MemoryLayout<CheckersVertexUniform>.size)
+            
+            rebuildCheckeredUniform = false
+        }
+        
         // Render the canvas to the drawable
         if let renderPassDescriptor = metalView.currentRenderPassDescriptor {
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+            
+            encoder.setRenderPipelineState(checkeredPipelineState)
+            encoder.setFragmentBuffer(checkeredUniformBuffer, offset: 0, index: 0)
+            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            
             encoder.setRenderPipelineState(canvasPipelineState)
             encoder.setVertexBuffer(canvasUniformBuffer, offset: 0, index: 0)
             encoder.setFragmentTexture(canvasTexture, index: 0)
