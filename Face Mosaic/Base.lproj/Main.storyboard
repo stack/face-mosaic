@@ -721,7 +721,7 @@
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="addImage:" target="XfG-lQ-9wD" id="zG5-j1-a6d"/>
+                                            <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="zG5-j1-a6d"/>
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Vud-5Z-LD8">
@@ -731,7 +731,7 @@
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="removeImage:" target="XfG-lQ-9wD" id="806-Mw-Gxx"/>
+                                            <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="806-Mw-Gxx"/>
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XXa-oU-irt">
@@ -741,7 +741,7 @@
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="export:" target="XfG-lQ-9wD" id="07k-ZP-FBn"/>
+                                            <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="07k-ZP-FBn"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -857,7 +857,7 @@
                                                 <rect key="frame" x="-2" y="289" width="113" height="24"/>
                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="-180" maxValue="180" tickMarkPosition="above" numberOfTickMarks="1" sliderType="linear" id="Wua-hq-1CD"/>
                                                 <connections>
-                                                    <action selector="maxRotationChanged:" target="XfG-lQ-9wD" id="hTH-02-59o"/>
+                                                    <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="hTH-02-59o"/>
                                                 </connections>
                                             </slider>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2zh-VN-VTZ">
@@ -872,7 +872,7 @@
                                                 <rect key="frame" x="-2" y="241" width="113" height="19"/>
                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="1000" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="GD5-07-ySo"/>
                                                 <connections>
-                                                    <action selector="interationsChanged:" target="XfG-lQ-9wD" id="zns-fp-emX"/>
+                                                    <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="zns-fp-emX"/>
                                                 </connections>
                                             </slider>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="i8z-IH-Bvm">
@@ -887,7 +887,7 @@
                                                 <rect key="frame" x="-2" y="186" width="113" height="24"/>
                                                 <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" numberOfTickMarks="1" sliderType="linear" id="ce0-xl-GNC"/>
                                                 <connections>
-                                                    <action selector="scaleChanged:" target="XfG-lQ-9wD" id="VBZ-ax-nSZ"/>
+                                                    <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="VBZ-ax-nSZ"/>
                                                 </connections>
                                             </slider>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UH3-ec-JJh">
@@ -905,7 +905,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="toggleBackgroundColorPicker:" target="XfG-lQ-9wD" id="w50-BW-eAm"/>
+                                                    <action selector="scaleSliderChanged:" target="XfG-lQ-9wD" id="w50-BW-eAm"/>
                                                 </connections>
                                             </button>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fkc-if-bgi">

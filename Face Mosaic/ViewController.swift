@@ -85,6 +85,20 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     private var exportType: ExportType = .png
     private var exportQueue: DispatchQueue = DispatchQueue(label: "Export")
     
+    private var iterations: Int = 1 {
+        didSet { iterationDidChange(oldValue: oldValue, newValue: iterations) }
+    }
+    
+    private var maxRotation: Float = 0.0 {
+        didSet { maxRotationDidChange(oldValue: oldValue, newValue: maxRotation) }
+    }
+    
+    private var scale: Float = 0.5 {
+        didSet { scaleDidChange(oldValue: oldValue, newValue: scale) }
+    }
+    
+    
+    
     // MARK: - Actions
     
     func addFace(from url: URL) {
@@ -288,23 +302,11 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
 
     @IBAction func interationsChanged(_ sender: Any?) {
-        let iterations = Int(iterationsSlider.integerValue)
-        renderer.iterations = iterations
-        
-        let template = NSLocalizedString("Iterations: %i", comment: "Iterations Label Template")
-        iterationsLabel.stringValue = String(format: template, iterations)
+        iterations = Int(iterationsSlider.integerValue)
     }
     
     @IBAction func maxRotationChanged(_ sender: Any?) {
-        let value = maxRotationSlider.floatValue / 360.0
-        renderer.maxRotation = value
-        
-        let template = NSLocalizedString("Max Rotation: %iº", comment: "Max Rotation Label Template")
-        maxRotationLabel.stringValue = String(format: template, Int(maxRotationSlider.floatValue))
-        
-        if value == 0.0 {
-            tickFeedback()
-        }
+        maxRotation = maxRotationSlider.floatValue / 360.0
     }
     
     @IBAction func removeImage(_ sender: Any?) {
@@ -344,30 +346,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 }
             })
         }
-        
-        /*
-        let sortedIndexes = indexes
-            .sorted()
-            .reversed()
-         for index in sortedIndexes {
-         images.remove(at: index.item)
-         renderer.removeFace(at: index.item)
-         }
-         
-         imageCollectionView.deleteItems(at: indexes)
-        */
     }
     
-    @IBAction func scaleChanged(_ sender: Any?) {
-        let value = scaleSlider.floatValue
-        renderer.scale = value / 100.0
-        
-        let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
-        scaleLabel.stringValue = String(format: template, Int(value))
-        
-        if value == 50.0 {
-            tickFeedback()
-        }
+    @IBAction func scaleSliderChanged(_ sender: Any?) {
+        scale = scaleSlider.floatValue / 100.0
     }
     
     @IBAction func toggleBackgroundColorPicker(_ sender: Any?) {
@@ -380,6 +362,36 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             
             backgroundColorPanel.makeKeyAndOrderFront(nil)
         }
+    }
+    
+    
+    // MARK: - Events
+    
+    override func magnify(with event: NSEvent) {
+        var scale = self.scale
+        scale += Float(event.magnification)
+        
+        scale = Swift.max(0.0, Swift.min(scale, 1.0))
+        
+        self.scale = scale
+    }
+    
+    override func rotate(with event: NSEvent) {
+        var rotation = self.maxRotation
+        rotation += event.rotation / 90.0 // This is a x4 speed up
+        
+        rotation = Swift.max(-0.5, Swift.min(rotation, 0.5))
+        
+        self.maxRotation = rotation
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        var iterations = self.iterations
+        iterations += Int(event.deltaX * 2.0)
+        
+        iterations = Swift.max(0, Swift.min(iterations, 1000))
+        
+        self.iterations = iterations
     }
     
     // MARK: - NSViewController Methods
@@ -466,6 +478,66 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     // MARK: - Utilities
+    
+    private func iterationDidChange(oldValue: Int, newValue: Int) {
+        // Do nothing if the scale didn't actually change
+        guard oldValue != newValue else {
+            return
+        }
+        
+        // Update the slider
+        iterationsSlider.integerValue = newValue
+        
+        // Update the slider label
+        let template = NSLocalizedString("Iterations: %i", comment: "Iterations Label Template")
+        iterationsLabel.stringValue = String(format: template, newValue)
+        
+        // Update the renderer
+        renderer.iterations = newValue
+    }
+    
+    private func maxRotationDidChange(oldValue: Float, newValue: Float) {
+        // Do nothing if the scale didn't actually change
+        guard oldValue != newValue else {
+            return
+        }
+        
+        // Update the slider
+        maxRotationSlider.floatValue = newValue * 360.0
+        
+        // Update the slider label
+        let template = NSLocalizedString("Max Rotation: %iº", comment: "Max Rotation Label Template")
+        maxRotationLabel.stringValue = String(format: template, Int(newValue * 360.0))
+        
+        // Update the renderer
+        renderer.maxRotation = newValue
+        
+        if oldValue < 0.0 && newValue >= 0.0 || oldValue > 0.0 && newValue <= 0.0 {
+            tickFeedback()
+        }
+    }
+    
+    private func scaleDidChange(oldValue: Float, newValue: Float) {
+        // Do nothing if the scale didn't actually change
+        guard oldValue != newValue else {
+            return
+        }
+        
+        // Update the slider
+        scaleSlider.floatValue = newValue * 100.0
+        
+        // Update the slider label
+        let template = NSLocalizedString("Scale: %i%%", comment: "Scale Label Template")
+        scaleLabel.stringValue = String(format: template, Int(newValue * 100.0))
+        
+        // Update the renderer
+        renderer.scale = newValue
+        
+        // Tick if this is in the middle
+        if oldValue < 0.5 && newValue >= 0.5 || oldValue > 0.5 && newValue <= 0.5 {
+            tickFeedback()
+        }
+    }
     
     private func tickFeedback() {
         NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .default)
