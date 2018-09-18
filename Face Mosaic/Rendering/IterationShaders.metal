@@ -46,10 +46,7 @@ fragment half4 canvas_fragment(CanvasVertexOut canvasVertex [[ stage_in ]],
                                 texture2d<float, access::sample> texture [[texture(0)]])
 {
     constexpr sampler textureSampler(mag_filter::linear,
-                                     min_filter::linear,
-                                     s_address::clamp_to_edge,
-                                     t_address::clamp_to_edge,
-                                     r_address::clamp_to_edge);
+                                     min_filter::linear);
     
     return (half4)texture.sample(textureSampler, canvasVertex.texturePosition);
 }
@@ -117,7 +114,7 @@ fragment half4 checkered_fragment(CheckeredVertexOut vertexData [[ stage_in ]],
 }
 
 struct FaceVertexIn {
-    packed_float2 position;
+    packed_float2 texturePosition;
 };
 
 struct FaceVertexOut {
@@ -129,26 +126,22 @@ struct FaceUniform {
     float4x4 model;
 };
 
-vertex FaceVertexOut face_instance_vertex(const device FaceUniform& uniform [[ buffer(0) ]],
+vertex FaceVertexOut face_instance_vertex(const device FaceVertexIn* vertices [[ buffer(0) ]],
+                                          const device FaceUniform& uniform [[ buffer(1) ]],
                                           ushort vid [[ vertex_id ]])
 {
     constexpr float2 positions[4] = {
-        float2(-1.0,  1.0),
-        float2( 1.0,  1.0),
+        float2(-1.0, 1.0),
+        float2( 1.0, 1.0),
         float2(-1.0, -1.0),
-        float2( 1.0, -1.0),
+        float2( 1.0, -1.0)
     };
     
-    constexpr float2 texturePositions[4] = {
-        float2(0.0, 0.0),
-        float2(1.0, 0.0),
-        float2(0.0, 1.0),
-        float2(1.0, 1.0)
-    };
+    FaceVertexIn vertexIn = vertices[vid];
     
     FaceVertexOut vertexOut;
     vertexOut.position = uniform.model * float4(positions[vid], 0.0, 1.0);
-    vertexOut.texturePosition = texturePositions[vid];
+    vertexOut.texturePosition = vertexIn.texturePosition;
     
     return vertexOut;
 }
@@ -158,9 +151,7 @@ fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
 {
     constexpr sampler textureSampler(mag_filter::linear,
                                      min_filter::linear,
-                                     s_address::clamp_to_edge,
-                                     t_address::clamp_to_edge,
-                                     r_address::clamp_to_edge);
+                                     mip_filter::nearest);
     
     return texture.sample(textureSampler, faceVertex.texturePosition);
 }

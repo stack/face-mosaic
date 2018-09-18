@@ -23,8 +23,8 @@ protocol Renderer: MTKViewDelegate {
     
     init(metalView: MTKView)
     
-    func addFace(url: URL)
-    func removeFace(at index: Int)
+    func addFaces(faces: [Face], completionHandler: @escaping (_ error: Error?) -> Void)
+    func removeFaces(faces: [Face], completionHandler: @escaping (_ error: Error?) -> Void)
     
     func makeImageBuffer() -> MTLBuffer
 }

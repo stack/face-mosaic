@@ -13,7 +13,7 @@ fileprivate let AcceptableTypes: [String] = [
 ]
 
 @objc protocol WindowDelegate {
-    func window(_ window: Window, receivedURL url: URL)
+    func window(_ window: Window, receivedURLs urls: [URL])
 }
 
 class Window: NSWindow, NSDraggingDestination {
@@ -56,10 +56,8 @@ class Window: NSWindow, NSDraggingDestination {
             return false
         }
         
-        for object in objects {
-            let url = object as! URL
-            windowDelegate?.window(self, receivedURL: url)
-        }
+        let urls = objects.map { $0 as! URL }
+        windowDelegate?.window(self, receivedURLs: urls)
         
         return true
     }

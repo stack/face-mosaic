@@ -75,7 +75,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     @IBOutlet weak var metalView: MTKView!
     
-    var images: [NSImage] = []
+    var faces: [Face] = []
     
     var renderer: Renderer!
     
@@ -86,6 +86,55 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     private var exportQueue: DispatchQueue = DispatchQueue(label: "Export")
     
     // MARK: - Actions
+    
+    func addFace(from url: URL) {
+        addFaces(from: [url])
+    }
+    
+    func addFaces(from urls: [URL]) {
+        // Disable the UI for processing
+        toggleAvailability(enabled: false)
+        
+        // Dispatch to the import thread
+        importQueue.async {
+            // Build faces for each url
+            let faces = urls.map { Face(url: $0) }
+            
+            // Send the faces to the renderer
+            self.renderer.addFaces(faces: faces) { (loadingError) in
+                DispatchQueue.main.sync {
+                    if let error = loadingError {
+                        // An error, so show it and don't add the faces to the interface
+                        let alert = NSAlert()
+                        alert.alertStyle = .warning
+                        alert.messageText = NSLocalizedString("Failed to load one or more of the provided images", comment: "Image loading failure message")
+                        alert.informativeText = "\(error)"
+                        
+                        guard let window = self.view.window else {
+                            fatalError("Failed to load one or more images and no window to present this fact")
+                        }
+                        
+                        alert.beginSheetModal(for: window, completionHandler: { _ in
+                            self.toggleAvailability(enabled: true)
+                        })
+                    } else {
+                        // Append the faces to the collection
+                        let insertRange = self.faces.count ..< (self.faces.count + faces.count)
+                        self.faces.append(contentsOf: faces)
+                        
+                        var paths: Set<IndexPath> = []
+                        for item in insertRange {
+                            paths.insert(IndexPath(item: item, section: ImagesMainSection))
+                        }
+                        
+                        self.imageCollectionView.insertItems(at: paths)
+                        
+                        self.toggleAvailability(enabled: true)
+                    }
+                }
+            }
+        }
+    }
     
     @IBAction func addImage(_ sender: Any?) {
         guard let window = view.window else {
@@ -101,23 +150,9 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         
         panel.beginSheetModal(for: window) { (response) in
             if response == .OK {
-                for url in panel.urls {
-                    self.addImage(from: url)
-                }
+                self.addFaces(from: panel.urls)
             }
         }
-    }
-    
-    func addImage(from url: URL) {
-        let image = NSImage(contentsOf: url)!
-        images.append(image)
-        
-        let path = IndexPath(item: self.images.count - 1, section: ImagesMainSection)
-        let items: Set<IndexPath> = [path]
-        
-        imageCollectionView.insertItems(at: items)
-        
-        renderer.addFace(url: url)
     }
     
     @IBAction func export(_ sender: Any?) {
@@ -273,17 +308,54 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     }
     
     @IBAction func removeImage(_ sender: Any?) {
-        let indexes = imageCollectionView.selectionIndexPaths
+        let faces = imageCollectionView.selectionIndexPaths.map { self.faces[$0.item] }
+        removeFaces(faces: faces)
+    }
+    
+    func removeFaces(faces: [Face]) {
+        toggleAvailability(enabled: false)
+        
+        importQueue.async {
+            self.renderer.removeFaces(faces: faces, completionHandler: { (removalError) in
+                DispatchQueue.main.sync {
+                    if let error = removalError {
+                        // An error, so show it and don't add the faces to the interface
+                        let alert = NSAlert()
+                        alert.alertStyle = .warning
+                        alert.messageText = NSLocalizedString("Failed to remove one or more of the provided images", comment: "Image loading failure message")
+                        alert.informativeText = "\(error)"
+                        
+                        guard let window = self.view.window else {
+                            fatalError("Failed to remove one or more images and no window to present this fact")
+                        }
+                        
+                        alert.beginSheetModal(for: window, completionHandler: { _ in
+                            self.toggleAvailability(enabled: true)
+                        })
+                    } else {
+                        for face in faces {
+                            self.faces.removeAll(where: { $0 == face })
+                        }
+                        
+                        self.imageCollectionView.deleteItems(at: self.imageCollectionView.selectionIndexPaths)
+                        
+                        self.toggleAvailability(enabled: true)
+                    }
+                }
+            })
+        }
+        
+        /*
         let sortedIndexes = indexes
             .sorted()
             .reversed()
-        
-        for index in sortedIndexes {
-            images.remove(at: index.item)
-            renderer.removeFace(at: index.item)
-        }
-        
-        imageCollectionView.deleteItems(at: indexes)
+         for index in sortedIndexes {
+         images.remove(at: index.item)
+         renderer.removeFace(at: index.item)
+         }
+         
+         imageCollectionView.deleteItems(at: indexes)
+        */
     }
     
     @IBAction func scaleChanged(_ sender: Any?) {
@@ -349,13 +421,13 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
             return item
         }
         
-        imageItem.image = images[indexPath.item]
+        imageItem.image = NSImage(byReferencing: faces[indexPath.item].url)
         
         return imageItem
     }
     
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return images.count
+        return faces.count
     }
     
     // MARK: <NSCollectionViewDelegate>

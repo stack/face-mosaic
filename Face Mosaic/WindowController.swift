@@ -10,21 +10,21 @@ import Cocoa
 
 class WindowController: NSWindowController, NSWindowDelegate, WindowDelegate {
     
-    func open(file path: String) {
+    func open(files: [String]) {
         guard let viewController = contentViewController as? ViewController else {
             return
         }
         
-        let url = URL(fileURLWithPath: path)
-        viewController.addImage(from: url)
+        let urls = files.map { URL(fileURLWithPath: $0) }
+        viewController.addFaces(from: urls)
     }
     
-    func window(_ window: Window, receivedURL url: URL) {
+    func window(_ window: Window, receivedURLs urls: [URL]) {
         guard let viewController = contentViewController as? ViewController else {
             return
         }
         
-        viewController.addImage(from: url)
+        viewController.addFaces(from: urls)
     }
     
     override func windowDidLoad() {

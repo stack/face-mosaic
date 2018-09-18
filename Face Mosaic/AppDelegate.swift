@@ -31,7 +31,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
         if let controller = windowController {
-            controller.open(file: filename)
+            controller.open(files: [filename])
         } else {
             filesToOpen.append(filename)
         }
@@ -42,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ sender: NSApplication, openFiles filenames: [String]) {
         if let controller = windowController {
             for filename in filenames {
-                controller.open(file: filename)
+                controller.open(files: [filename])
             }
         } else {
             filesToOpen.append(contentsOf: filenames)
@@ -51,11 +51,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let controller = windowController {
-            for file in filesToOpen {
-                controller.open(file: file)
+            if filesToOpen.count > 0 {
+                controller.open(files: filesToOpen)
+                filesToOpen.removeAll()
             }
-            
-            filesToOpen.removeAll()
         } else {
             print("Application launched without the main window controller")
         }
