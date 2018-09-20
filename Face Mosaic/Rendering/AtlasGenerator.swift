@@ -50,6 +50,11 @@ class AtlasGenerator {
             return
         }
         
+        // Clear the texture
+        let bytes: [UInt8] = [UInt8](repeating: 0, count: Int(maxWidth * maxHeight) * 4)
+        let region = MTLRegion(origin: MTLOrigin.init(x: 0, y: 0, z: 0), size: MTLSize(width: Int(maxWidth), height: Int(maxHeight), depth: 1))
+        texture.replace(region: region, mipmapLevel: 0, withBytes: bytes, bytesPerRow: Int(maxWidth) * 4)
+        
         // Calculate pixel layouts for each face
         var currentX: Float = 0.0
         var currentY: Float = 0.0

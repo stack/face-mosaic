@@ -157,7 +157,8 @@ class IterationRenderer: NSObject, Renderer {
         
         canvasPipelineState = try! metalDevice.makeRenderPipelineState(descriptor: canvasPipelineDescriptor)
         
-        let canvasDescriptor = IterationRenderer.canvasTextureDescriptor(format: metalView.colorPixelFormat, size: canvasSize)
+        let canvasDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: metalView.colorPixelFormat, width: Int(canvasSize.x), height: Int(canvasSize.y), mipmapped: false)
+        canvasDescriptor.usage = [.renderTarget, .shaderRead]
         canvasTexture = metalDevice.makeTexture(descriptor: canvasDescriptor)!
         
         canvasUniformBuffer = metalDevice.makeBuffer(length: MemoryLayout<CanvasUniform>.size, options: [])!
@@ -292,135 +293,10 @@ class IterationRenderer: NSObject, Renderer {
         }
     }
     
-    // MARK: - Canvas Management
-    
-    private static func canvasTextureDescriptor(format: MTLPixelFormat, size: float2) -> MTLTextureDescriptor {
-        let descriptor = MTLTextureDescriptor()
-        descriptor.textureType = .type2D
-        descriptor.width = Int(size.x)
-        descriptor.height = Int(size.y)
-        descriptor.pixelFormat = format
-        descriptor.usage = [.renderTarget, .shaderRead]
-        
-        return descriptor
-    }
-    
-    private static func canvasVertices(canvasSize: float2, sceneSize: float2) -> CanvasUniform {
-        let delta = sceneSize / canvasSize
-        let factor = delta.min() ?? 1.0
-        
-        let scaledSize = canvasSize * factor
-        let scaledOffset = scaledSize / sceneSize
-        
-        return CanvasUniform(modelMatrix: float4x4.scale(by: scaledOffset.x, y: scaledOffset.y, z: 1.0))
-    }
-    
-    private func calculateScalingMatrices() {
-        for (idx, face) in faces.enumerated() {
-            var newFace = face
-            
-            let delta = canvasSize / face.imageSize
-            let factor = delta.min()!
-            
-            let scaledSize = face.textureSize * factor
-            let normalizedOffset = (scaledSize / canvasSize)
-            
-            newFace.scalingMatrix = float4x4.scale(by: normalizedOffset.x, y: normalizedOffset.y, z: 1.0)
-            
-            faces[idx] = newFace
-        }
-    }
-    
-    private func renderFacesToCanvas(commandBuffer: MTLCommandBuffer) {
-        // Extract the background color
-        var red: CGFloat = 0.0, green: CGFloat = 0.0, blue: CGFloat = 0.0, alpha: CGFloat = 0.0
-        backgroundColor.usingColorSpace(.deviceRGB)!.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = canvasTexture
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
-            red: Double(red),
-            green: Double(green),
-            blue: Double(blue),
-            alpha: Double(alpha)
-        )
-        renderPassDescriptor.colorAttachments[0].storeAction = .store
-        
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-        encoder.setViewport(MTLViewport(originX: 0.0, originY: 0.0, width: Double(canvasSize.x), height: Double(canvasSize.y), znear: 0.0, zfar: 1.0))
-        
-        // Fill in any missing scaling matrices
-        if recalculateScale {
-            calculateScalingMatrices()
-            recalculateScale = false
-        }
-        
-        // Build a reproducable random number generate for our calculations
-        let rng = GKARC4RandomSource(seed: seedData)
-        
-        // Build all of the uniforms for each iteration of each face
-        if faces.count > 0 && iterations > 0 {
-            let memorySize = MemoryLayout<FaceUniform>.size
-            let bufferSize = memorySize * iterations * faces.count
-            
-            if facesUniformBuffer.length != bufferSize {
-                facesUniformBuffer = metalDevice.makeBuffer(length: bufferSize, options: [])!
-            }
-            
-            var contents = facesUniformBuffer.contents()
-            
-            for _ in 0 ..< iterations {
-                for face in faces {
-                    var matrix = float4x4.identity()
-                    
-                    matrix = matrix.scaled(by: scale, y: scale, z: 1.0)
-                    
-                    let rotation = rng.nextUniform() * maxRotation
-                    let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
-                    matrix = matrix.zRotated(by: .pi * 2.0 * (rotation * rotationMultiplier))
-                    
-                    matrix = face.scalingMatrix * matrix
-                    
-                    let translateX = rng.nextUniform() * 2.0 - 1.0
-                    let translateY = rng.nextUniform() * 2.0 - 1.0
-                    matrix = matrix.translated(by: translateX, y: translateY, z: 0.0)
-                    
-                    var uniform = FaceUniform(
-                        modelMatrix: matrix
-                    )
-                    
-                    memcpy(contents, &uniform, memorySize)
-                    contents += memorySize
-                }
-            }
-            
-            guard let texture = facesTexture, let buffer = facesVertexBuffer else {
-                encoder.endEncoding()
-                return
-            }
-            
-            // Render each face
-            for iteration in 0 ..< Int(iterations) {
-                for (idx, face) in faces.enumerated() {
-                    let offset = iteration * faces.count + idx
-                    
-                    encoder.setRenderPipelineState(face.pipelineState!)
-                    encoder.setVertexBuffer(buffer, offset: idx * MemoryLayout<Float>.size * 8, index: 0)
-                    encoder.setVertexBuffer(facesUniformBuffer, offset: memorySize * offset, index: 1)
-                    encoder.setFragmentTexture(texture, index: 0)
-                    encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-                }
-            }
-        }
-    
-        encoder.endEncoding()
-    }
-    
-    
     // MARK: - Rendering Functions
     
-    func draw(in view: MTKView) {
+    private func originalDrawingCode(view: MTKView) {
+        /*
         // Rebuild the canvas if needed
         if rebuildCanvasTexture {
             let descriptor = IterationRenderer.canvasTextureDescriptor(format: metalView.colorPixelFormat, size: canvasSize)
@@ -490,10 +366,213 @@ class IterationRenderer: NSObject, Renderer {
         
         // Finalize the drawing
         commandBuffer.commit()
+        */
+    }
+    
+    func draw(in view: MTKView) {
+        // Prepare all of the assets
+        prepareBackground()
+        prepareCanvas()
+        prepareFaces()
+        
+        // Start the drawing
+        guard let commandBuffer = commandQueue.makeCommandBuffer() else {
+            print("Could not generate a command buffer")
+            return
+        }
+        
+        guard let renderPassDescriptor = metalView.currentRenderPassDescriptor else {
+            print("No render pass descriptor could be retrieved")
+            return
+        }
+        
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+            print("Could not make a render commadn encoder")
+            return
+        }
+        
+        // Draw all of the parts
+        drawBackground(encoder: encoder)
+        drawFaces()
+        drawCanvas(encoder: encoder)
+        
+        
+        // Finalize the drawing
+        encoder.endEncoding()
+        
+        if let drawable = view.currentDrawable {
+            commandBuffer.present(drawable)
+        }
+        
+        commandBuffer.commit()
+    }
+    
+    private func drawBackground(encoder: MTLRenderCommandEncoder) {
+        // Render a empty set of vertices to draw the triangles
+        encoder.setRenderPipelineState(checkeredPipelineState)
+        encoder.setFragmentBuffer(checkeredUniformBuffer, offset: 0, index: 0)
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+    }
+    
+    private func drawCanvas(encoder: MTLRenderCommandEncoder) {
+        // Render the canvas to the background
+        encoder.setRenderPipelineState(canvasPipelineState)
+        encoder.setVertexBuffer(canvasUniformBuffer, offset: 0, index: 0)
+        encoder.setFragmentTexture(canvasTexture, index: 0)
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+    }
+    
+    private func drawFaces() {
+        guard let commandBuffer = commandQueue.makeCommandBuffer() else {
+            print("Failed to create faces command buffer")
+            return
+        }
+        
+        // Extract the background color
+        var red: CGFloat = 0.0, green: CGFloat = 0.0, blue: CGFloat = 0.0, alpha: CGFloat = 0.0
+        backgroundColor.usingColorSpace(.deviceRGB)!.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        
+        // Build a new render pass descriptor
+        let renderPassDescriptor = MTLRenderPassDescriptor()
+        renderPassDescriptor.colorAttachments[0].texture = canvasTexture
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
+            red: Double(red),
+            green: Double(green),
+            blue: Double(blue),
+            alpha: Double(alpha)
+        )
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
+        
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+            print("Failed to build faces command encoder")
+            return
+        }
+        
+        encoder.setViewport(MTLViewport(originX: 0.0, originY: 0.0, width: Double(canvasSize.x), height: Double(canvasSize.y), znear: 0.0, zfar: 1.0))
+        
+        // Draw faces
+        if let texture = facesTexture, let buffer = facesVertexBuffer {
+            for iteration in 0 ..< Int(iterations) {
+                for (idx, face) in faces.enumerated() {
+                    let offset = iteration * faces.count + idx
+                    
+                    encoder.setRenderPipelineState(face.pipelineState!)
+                    encoder.setVertexBuffer(buffer, offset: idx * MemoryLayout<Float>.size * 8, index: 0)
+                    encoder.setVertexBuffer(facesUniformBuffer, offset: MemoryLayout<FaceUniform>.size * offset, index: 1)
+                    encoder.setFragmentTexture(texture, index: 0)
+                    encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+                }
+            }
+        }
+        
+        // Finalize
+        encoder.endEncoding()
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         sceneSize = float2(Float(size.width), Float(size.height))
+    }
+    
+    private func prepareBackground() {
+        // CACHEABLE: Fill in the uniform buffer
+        let scalingFactor: Float
+        if let factor = metalView.window?.screen?.backingScaleFactor {
+            scalingFactor = Float(factor)
+        } else {
+            scalingFactor = 1.0
+        }
+        
+        var uniform = CheckersVertexUniform(
+            screenSize: sceneSize,
+            dimensions: float2(16.0 * scalingFactor, 16.0 * scalingFactor)
+        )
+        
+        memcpy(checkeredUniformBuffer.contents(), &uniform, MemoryLayout<CheckersVertexUniform>.size)
+    }
+    
+    private func prepareCanvas() {
+        // CACHEABLE: Make the texture
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(canvasSize.x), height: Int(canvasSize.y), mipmapped: false)
+        descriptor.usage = [.renderTarget, .shaderRead]
+        
+        guard let texture = metalDevice.makeTexture(descriptor: descriptor) else {
+            print("Failed to make the canvas texture")
+            return
+        }
+        
+        // CACHEABLE: Calculate the vertices for the canvas
+        let delta = sceneSize / canvasSize
+        let factor = delta.min() ?? 1.0
+        
+        let scaledSize = canvasSize * factor
+        let scaledOffset = scaledSize / sceneSize
+        
+        var uniform =  CanvasUniform(modelMatrix: float4x4.scale(by: scaledOffset.x, y: scaledOffset.y, z: 1.0))
+        memcpy(canvasUniformBuffer.contents(), &uniform, MemoryLayout<CanvasUniform>.size)
+        
+        // Store the new texture
+        canvasTexture = texture
+    }
+    
+    func prepareFaces() {
+        // CACHEABLE: Recaulcate scaling matrices
+        for (idx, face) in faces.enumerated() {
+            var newFace = face
+            
+            let delta = canvasSize / face.imageSize
+            let factor = delta.min()!
+            
+            let scaledSize = face.textureSize * factor
+            let normalizedOffset = (scaledSize / canvasSize)
+            
+            newFace.scalingMatrix = float4x4.scale(by: normalizedOffset.x, y: normalizedOffset.y, z: 1.0)
+            
+            faces[idx] = newFace
+        }
+        
+        // CACHEABLE: Calculate model matrices
+        if faces.count > 0 && iterations > 0 {
+            let memorySize = MemoryLayout<FaceUniform>.size
+            let bufferSize = memorySize * iterations * faces.count
+            
+            if facesUniformBuffer.length != bufferSize {
+                facesUniformBuffer = metalDevice.makeBuffer(length: bufferSize, options: [])!
+            }
+            
+            var contents = facesUniformBuffer.contents()
+            
+            // Build a reproducable random number generate for our calculations
+            let rng = GKARC4RandomSource(seed: seedData)
+            
+            for _ in 0 ..< iterations {
+                for face in faces {
+                    var matrix = float4x4.identity()
+                    
+                    matrix = matrix.scaled(by: scale, y: scale, z: 1.0)
+                    
+                    let rotation = rng.nextUniform() * maxRotation
+                    let rotationMultiplier: Float = rng.nextInt(upperBound: 2) == 0 ? -1.0 : 1.0
+                    matrix = matrix.zRotated(by: .pi * 2.0 * (rotation * rotationMultiplier))
+                    
+                    matrix = face.scalingMatrix * matrix
+                    
+                    let translateX = rng.nextUniform() * 2.0 - 1.0
+                    let translateY = rng.nextUniform() * 2.0 - 1.0
+                    matrix = matrix.translated(by: translateX, y: translateY, z: 0.0)
+                    
+                    var uniform = FaceUniform(
+                        modelMatrix: matrix
+                    )
+                    
+                    memcpy(contents, &uniform, memorySize)
+                    contents += memorySize
+                }
+            }
+        }
     }
     
     // MARK: - Export Functions
