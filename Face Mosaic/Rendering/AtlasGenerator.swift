@@ -44,7 +44,7 @@ class AtlasGenerator {
         let maxHeight = maxHeights.reduce(0.0) { $0 + $1 }
         
         // Generate the texture
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(maxWidth), height: Int(maxHeight), mipmapped: false)
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(maxWidth), height: Int(maxHeight), mipmapped: true)
         guard let texture = device.makeTexture(descriptor: textureDescriptor) else {
             completionHandler(nil, nil, RenderingError.textureGeneration)
             return
@@ -52,7 +52,7 @@ class AtlasGenerator {
         
         // Clear the texture
         let bytes: [UInt8] = [UInt8](repeating: 0, count: Int(maxWidth * maxHeight) * 4)
-        let region = MTLRegion(origin: MTLOrigin.init(x: 0, y: 0, z: 0), size: MTLSize(width: Int(maxWidth), height: Int(maxHeight), depth: 1))
+        let region = MTLRegionMake2D(0, 0, Int(maxWidth), Int(maxHeight))
         texture.replace(region: region, mipmapLevel: 0, withBytes: bytes, bytesPerRow: Int(maxWidth) * 4)
         
         // Calculate pixel layouts for each face
@@ -94,7 +94,7 @@ class AtlasGenerator {
         }
         
         // Generate mipmaps
-        // encoder.generateMipmaps(for: texture)
+        encoder.generateMipmaps(for: texture)
         
         // Normalize the layout
         let divisor = float4(x: maxWidth, y: maxHeight, z: maxWidth, w: maxHeight)

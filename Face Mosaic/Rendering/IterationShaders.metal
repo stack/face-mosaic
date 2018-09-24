@@ -153,5 +153,11 @@ fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
                                      min_filter::linear,
                                      mip_filter::nearest);
     
-    return texture.sample(textureSampler, faceVertex.texturePosition);
+    half4 color = texture.sample(textureSampler, faceVertex.texturePosition);
+    
+    if (color.a < 0.05) {
+        discard_fragment();
+    }
+    
+    return color;
 }

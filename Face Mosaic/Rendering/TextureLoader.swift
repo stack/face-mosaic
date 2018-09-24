@@ -51,7 +51,7 @@ class TextureLoader {
                 bytesPerRow: bytesPerRow,
                 space: colorSpace,
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                )!
+            )!
             
             let bounds = CGRect(x: 0, y: 0, width: dimension, height: dimension)
             context.clear(bounds)
