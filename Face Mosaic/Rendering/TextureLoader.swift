@@ -20,6 +20,8 @@ class TextureLoader {
     
     private let queue: DispatchQueue
     
+    let mipmapped: Bool = false
+    
     init(device: MTLDevice) {
         self.device = device
         commandQueue = device.makeCommandQueue()!
@@ -62,7 +64,7 @@ class TextureLoader {
             let drawingBounds = CGRect(x: (dimension - width) / 2, y: (dimension - height) / 2, width: width, height: height)
             context.draw(cgImage, in: drawingBounds)
             
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: dimension, height: dimension, mipmapped: true)
+            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: dimension, height: dimension, mipmapped: self.mipmapped)
             let texture = self.device.makeTexture(descriptor: textureDescriptor)!
             texture.label = url.lastPathComponent
             
@@ -72,9 +74,11 @@ class TextureLoader {
             
             let commandBuffer = self.commandQueue.makeCommandBuffer()!
             
-            let blitCommandEncoder = commandBuffer.makeBlitCommandEncoder()!
-            blitCommandEncoder.generateMipmaps(for: texture)
-            blitCommandEncoder.endEncoding()
+            if self.mipmapped {
+                let blitCommandEncoder = commandBuffer.makeBlitCommandEncoder()!
+                blitCommandEncoder.generateMipmaps(for: texture)
+                blitCommandEncoder.endEncoding()
+            }
             
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()

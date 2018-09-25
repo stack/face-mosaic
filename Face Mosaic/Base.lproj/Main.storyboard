@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14313.18"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -708,11 +707,11 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="Face_Mosaic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="851" height="526"/>
+                        <rect key="frame" x="0.0" y="0.0" width="852" height="526"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="5rc-GM-drK">
-                                <rect key="frame" x="0.0" y="0.0" width="851" height="37"/>
+                                <rect key="frame" x="0.0" y="0.0" width="852" height="37"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Bm1-fL-np0">
                                         <rect key="frame" x="2" y="1" width="47" height="32"/>
@@ -735,7 +734,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XXa-oU-irt">
-                                        <rect key="frame" x="769" y="1" width="80" height="32"/>
+                                        <rect key="frame" x="770" y="1" width="80" height="32"/>
                                         <buttonCell key="cell" type="push" title="Export" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="p0d-s6-0M3">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -744,11 +743,22 @@
                                             <action selector="export:" target="XfG-lQ-9wD" id="Lad-u9-vek"/>
                                         </connections>
                                     </button>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BLt-if-nfV">
+                                        <rect key="frame" x="380" y="10" width="92" height="17"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Total Faces: 0" id="hAX-dQ-yTH">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="Bm1-fL-np0" secondAttribute="bottom" constant="8" id="2kF-9P-t4D"/>
-                                    <constraint firstItem="XXa-oU-irt" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Vud-5Z-LD8" secondAttribute="trailing" constant="8" id="7a5-jY-6lD"/>
+                                    <constraint firstItem="BLt-if-nfV" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Vud-5Z-LD8" secondAttribute="trailing" constant="8" id="5HF-ow-3HW"/>
+                                    <constraint firstItem="XXa-oU-irt" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="BLt-if-nfV" secondAttribute="trailing" constant="8" id="Cbk-fn-SSS"/>
                                     <constraint firstItem="Vud-5Z-LD8" firstAttribute="leading" secondItem="Bm1-fL-np0" secondAttribute="trailing" constant="8" id="HFC-jG-3xa"/>
+                                    <constraint firstItem="BLt-if-nfV" firstAttribute="centerY" secondItem="5rc-GM-drK" secondAttribute="centerY" id="MtA-gZ-AJn"/>
+                                    <constraint firstItem="BLt-if-nfV" firstAttribute="centerX" secondItem="5rc-GM-drK" secondAttribute="centerX" id="OO7-8U-0fU"/>
                                     <constraint firstItem="XXa-oU-irt" firstAttribute="top" secondItem="5rc-GM-drK" secondAttribute="top" constant="8" id="Pwz-9M-pcO"/>
                                     <constraint firstItem="Bm1-fL-np0" firstAttribute="leading" secondItem="5rc-GM-drK" secondAttribute="leading" constant="8" id="REb-ao-h8U"/>
                                     <constraint firstAttribute="trailing" secondItem="XXa-oU-irt" secondAttribute="trailing" constant="8" id="VaC-0o-MhR"/>
@@ -759,7 +769,7 @@
                                 </constraints>
                             </customView>
                             <splitView arrangesAllSubviews="NO" dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7i2-8I-ZAC">
-                                <rect key="frame" x="0.0" y="37" width="651" height="489"/>
+                                <rect key="frame" x="0.0" y="37" width="652" height="489"/>
                                 <subviews>
                                     <customView id="TSw-tG-PZN">
                                         <rect key="frame" x="0.0" y="0.0" width="139" height="489"/>
@@ -815,11 +825,11 @@
                                         </constraints>
                                     </customView>
                                     <customView id="hQb-eN-CFw">
-                                        <rect key="frame" x="140" y="0.0" width="511" height="489"/>
+                                        <rect key="frame" x="140" y="0.0" width="512" height="489"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
                                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="bw3-Dy-9ZQ" customClass="MTKView">
-                                                <rect key="frame" x="0.0" y="0.0" width="511" height="489"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="512" height="489"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="TZq-WE-YhO"/>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="300" id="nFa-7P-J7U"/>
@@ -840,7 +850,7 @@
                                 </holdingPriorities>
                             </splitView>
                             <visualEffectView appearanceType="inheritedVibrantLight" blendingMode="behindWindow" material="underWindowBackground" state="followsWindowActiveState" translatesAutoresizingMaskIntoConstraints="NO" id="RPz-hO-ARv">
-                                <rect key="frame" x="651" y="37" width="200" height="489"/>
+                                <rect key="frame" x="652" y="37" width="200" height="489"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="250" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iHe-sK-Yuv">
                                         <rect key="frame" x="20" y="131" width="160" height="338"/>
@@ -861,8 +871,8 @@
                                                 </connections>
                                             </slider>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2zh-VN-VTZ">
-                                                <rect key="frame" x="-2" y="266" width="61" height="17"/>
-                                                <textFieldCell key="cell" lineBreakMode="clipping" title="Iterations" id="qxV-Gn-lQK">
+                                                <rect key="frame" x="-2" y="266" width="75" height="17"/>
+                                                <textFieldCell key="cell" lineBreakMode="clipping" title="Iterations: 1" id="qxV-Gn-lQK">
                                                     <font key="font" metaFont="system"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1056,6 +1066,7 @@
                         <outlet property="scaleSlider" destination="T8n-da-dDt" id="dGq-tG-Jkj"/>
                         <outlet property="seedLabel" destination="V6w-1M-ohw" id="h4N-YQ-mhB"/>
                         <outlet property="seedTextField" destination="gaY-vL-EgR" id="JMC-IF-CzZ"/>
+                        <outlet property="totalFacesLabel" destination="BLt-if-nfV" id="Ud4-iA-Stm"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

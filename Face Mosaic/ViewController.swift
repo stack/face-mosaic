@@ -73,6 +73,8 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     
     @IBOutlet weak var exportButton: NSButton!
     
+    @IBOutlet weak var totalFacesLabel: NSTextField!
+    
     @IBOutlet weak var metalView: MTKView!
     
     var faces: [Face] = []
@@ -86,7 +88,10 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     private var exportQueue: DispatchQueue = DispatchQueue(label: "Export")
     
     private var iterations: Int = 1 {
-        didSet { iterationDidChange(oldValue: oldValue, newValue: iterations) }
+        didSet {
+            iterationDidChange(oldValue: oldValue, newValue: iterations)
+            updateTotalIterations()
+        }
     }
     
     private var maxRotation: Float = 0.0 {
@@ -96,8 +101,6 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
     private var scale: Float = 0.5 {
         didSet { scaleDidChange(oldValue: oldValue, newValue: scale) }
     }
-    
-    
     
     // MARK: - Actions
     
@@ -144,6 +147,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                         self.imageCollectionView.insertItems(at: paths)
                         
                         self.toggleAvailability(enabled: true)
+                        self.updateTotalIterations()
                     }
                 }
             }
@@ -253,7 +257,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                 bitsPerPixel: 32,
                 bytesPerRow: Int(self.renderer.canvasSize.x) * 4,
                 space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),  CGBitmapInfo.byteOrder32Little],
+                bitmapInfo: [CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),  CGBitmapInfo.byteOrder32Big],
                 provider: dataProvider,
                 decode: nil,
                 shouldInterpolate: false,
@@ -342,6 +346,7 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
                         self.imageCollectionView.deleteItems(at: self.imageCollectionView.selectionIndexPaths)
                         
                         self.toggleAvailability(enabled: true)
+                        self.updateTotalIterations()
                     }
                 }
             })
@@ -539,6 +544,14 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         }
     }
     
+    private func setRemoveButtonState() {
+        if imageCollectionView.selectionIndexes.isEmpty {
+            removeImageButton.isEnabled = false
+        } else {
+            removeImageButton.isEnabled = true
+        }
+    }
+    
     private func tickFeedback() {
         NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .default)
     }
@@ -562,12 +575,17 @@ class ViewController: NSViewController, NSCollectionViewDataSource, NSCollection
         exportButton.isEnabled = enabled
     }
     
-    private func setRemoveButtonState() {
-        if imageCollectionView.selectionIndexes.isEmpty {
-            removeImageButton.isEnabled = false
-        } else {
-            removeImageButton.isEnabled = true
-        }
+    private func updateTotalIterations() {
+        let template = NSLocalizedString("Total Faces: %@", comment: "Total Faces Template")
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        formatter.minimumFractionDigits = 0
+        
+        let formattedNumber = formatter.string(from: NSNumber(value: faces.count * iterations))!
+        
+        totalFacesLabel.stringValue = String(format: template, formattedNumber)
     }
 
 }

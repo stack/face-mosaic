@@ -15,6 +15,8 @@ class AtlasGenerator {
     private let device: MTLDevice
     private let commandQueue: MTLCommandQueue
     
+    let mipmapped: Bool = false
+    
     init(device: MTLDevice) {
         self.device = device
         self.commandQueue = device.makeCommandQueue()!
@@ -44,7 +46,7 @@ class AtlasGenerator {
         let maxHeight = maxHeights.reduce(0.0) { $0 + $1 }
         
         // Generate the texture
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(maxWidth), height: Int(maxHeight), mipmapped: true)
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(maxWidth), height: Int(maxHeight), mipmapped: mipmapped)
         guard let texture = device.makeTexture(descriptor: textureDescriptor) else {
             completionHandler(nil, nil, RenderingError.textureGeneration)
             return
@@ -94,7 +96,9 @@ class AtlasGenerator {
         }
         
         // Generate mipmaps
-        encoder.generateMipmaps(for: texture)
+        if mipmapped {
+            encoder.generateMipmaps(for: texture)
+        }
         
         // Normalize the layout
         let divisor = float4(x: maxWidth, y: maxHeight, z: maxWidth, w: maxHeight)

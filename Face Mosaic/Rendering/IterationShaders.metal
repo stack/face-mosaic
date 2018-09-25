@@ -155,7 +155,7 @@ fragment half4 face_instance_fragment(FaceVertexOut faceVertex [[stage_in]],
     
     half4 color = texture.sample(textureSampler, faceVertex.texturePosition);
     
-    if (color.a < 0.05) {
+    if (color.a == 0.0) {
         discard_fragment();
     }
     
